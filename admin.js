@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { ensureLoggedIn, catchErrors } = require('./utils');
+const { ensureLoggedIn, catchErrors } = require('./utils.js');
 const { fetchData } = require('./db');
 
 const router = express.Router();
