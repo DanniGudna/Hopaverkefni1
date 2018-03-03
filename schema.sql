@@ -27,8 +27,8 @@ CREATE TABLE books (
 
 CREATE TABLE readBooks (
     id SERIAL PRIMARY KEY,
-    userID serial NOT NULL,
-    bookID serial NOT NULL,
+    userID INT NOT NULL,
+    bookID INT NOT NULL,
     rating INT NOT NULL,
     review TEXT,
     FOREIGN KEY (userID) REFERENCES users (id),

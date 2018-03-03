@@ -9,7 +9,7 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 
 const readFileAsync = util.promisify(fs.readFile);
 
-const schemaFile = './schema.sql';
+const schemaFile = './testdata.sql';
 
 async function query(q) {
   const client = new Client({ connectionString });
