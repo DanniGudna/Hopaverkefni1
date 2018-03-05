@@ -8,7 +8,7 @@ CREATE TABLE users (
 
 CREATE TABLE categories (
     id SERIAL PRIMARY KEY,
-    categoryName VARCHAR(255) UNIQUE NOT NULL
+    category VARCHAR(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE books (
@@ -17,12 +17,12 @@ CREATE TABLE books (
     isbn13 VARCHAR(13) UNIQUE NOT NULL,
     author VARCHAR(64),
     description TEXT,
-    categoryName VARCHAR(255) UNIQUE NOT NULL,
+    category VARCHAR(255) UNIQUE NOT NULL,
     isbn10 VARCHAR(10) UNIQUE,
-    publishDate DATE,
-    pages INT,
-    lang VARCHAR(2),
-    FOREIGN KEY (categoryName) REFERENCES categories (categoryName)
+    published DATE,
+    pagecount INT,
+    language VARCHAR(2),
+    FOREIGN KEY (category) REFERENCES categories (category)
 );
 
 CREATE TABLE readBooks (
