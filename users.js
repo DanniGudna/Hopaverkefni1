@@ -1,40 +1,46 @@
-const bcrypt = require('bcrypt');
+const express = require('express');
 
-const records = [
-  {
-    id: 1,
-    username: 'admin',
-    password: '$2a$11$pgj3.zySyFOvIQEpD7W6Aund1Tw.BFarXxgLJxLbrzIv/4Nteisii',
-    name: 'Stjórnandi',
-  },
-];
+const router = express.Router();
+router.use(express.urlencoded({ extended: true }));
 
-exports.comparePasswords = (hash, user) =>
-  bcrypt.compare(hash, user.password)
-    .then((res) => {
-      if (res) {
-        return user;
-      }
-      return false;
-    });
+// get all users
+router.get('/', (req, res) => {
 
-exports.findByUsername = username => new Promise((resolve) => {
-  const found = records.find(u => u.username === username);
-
-  if (found) {
-    return resolve(found);
-  }
-
-  return resolve(null);
 });
 
-
-exports.findById = id => new Promise((resolve) => {
-  const found = records.find(u => u.id === id);
-
-  if (found) {
-    return resolve(found);
-  }
-
-  return resolve(null);
+// get user by id
+router.get('/:id', (req, res) => {
+  const { id } = req.params;
 });
+
+// get me
+router.get('/me', (req, res) => {
+
+});
+
+// get my profile
+router.get('/me/profile', (req, res) => {
+ 
+});
+
+// get book read by user
+router.get('/:id/read', (req, res) => {
+  const { id } = req.params;
+});
+
+// get books read by me
+router.get('/me/read', (req, res) => {
+
+});
+
+// add book read by me
+router.post('/me/read', (req, res) => {
+
+});
+
+// delete book i've read by id
+router.delete('/me/read/:id', (req, res) => {
+  const { id } = req.params;
+});
+
+module.exports = router;
