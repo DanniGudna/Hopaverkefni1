@@ -5,77 +5,17 @@ const express = require('express');
 const session = require('express-session');
 
 const admin = require('./admin');
+const books = require('./books');
+const users = require('./users');
 
 const app = express();
 
-const passport = require('passport');
-const { Strategy } = require('passport-local');
-const users = require('./users');
-
-const sessionSecret = process.env.SESSION_SECRET || 'fj489jfadkljv';
-
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  secret: sessionSecret,
-  resave: false,
-  saveUninitialized: false,
-}));
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-function strat(username, password, done) {
-  users
-    .findByUsername(username)
-    .then((user) => {
-      if (!user) {
-        return false;
-      }
-
-      return users.comparePasswords(password, user);
-    })
-    .then(res => done(null, res))
-    .catch((err) => {
-      done(err);
-    });
-}
-
-passport.use(new Strategy(strat));
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser((id, done) => {
-  users
-    .findById(id)
-    .then(user => done(null, user))
-    .catch(err => done(err));
-});
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use((req, res, next) => {
-  if (req.isAuthenticated()) {
-    res.locals.user = req.user.name;
-  }
-
-  res.locals.showLogin = true;
-
-  next();
-});
-
-// hjálparfall fyrir view
-app.locals.isInvalid = (param, errors) => {
-  if (!errors) {
-    return false;
-  }
-
-  return Boolean(errors.find(i => i.param === param));
-};
 
 app.get('/login', (req, res) => {
   let message = '';
@@ -87,23 +27,28 @@ app.get('/login', (req, res) => {
   res.render('login', { showLogin: false, message, title: 'Innskráning' });
 });
 
-app.post(
-  '/login',
-  passport.authenticate('local', {
-    failureMessage: 'Vitlaust notendanafn eða lykilorð',
-    failureRedirect: '/login',
-  }),
-  (req, res) => {
-    res.redirect('/admin');
-  },
-);
+app.post('/login', (req, res) => {
+
+});
 
 app.get('/logout', (req, res) => {
   req.logout();
   res.redirect('/');
 });
 
+// registers new user
+app.post('/register', (req, res) => {
+
+});
+
+// logs in new user
+app.post('/login', (req, res) => {
+
+});
+
 app.use('/admin', admin);
+app.use('/books', books);
+app.use('/users', users);
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).render('error', { title: '404' });
