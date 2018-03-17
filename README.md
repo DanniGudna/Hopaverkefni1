@@ -112,7 +112,7 @@ Fyrir innskráðan notanda skal einnig vera hægt að:
 
 ### Síður (paging)
 
-Fyrir fyrirspurnir sem skila listum af gögnum þarf að _page_a þau gögn. Þ.e.a.s. að sækja aðeins takmarkað magn úr heildarlista í einu og láta vita af næstu síðu. Þetta kemur í veg fyrir að við sækjum of mikið af efni í einu, t.d. ef gagnagrunnur myndi innihalda tugþúsundir bóka og notanda.
+Fyrir fyrirspurnir sem skila listum af gögnum þarf að _page_a_ þau gögn. Þ.e.a.s. að sækja aðeins takmarkað magn úr heildarlista í einu og láta vita af næstu síðu. Þetta kemur í veg fyrir að við sækjum of mikið af efni í einu, t.d. ef gagnagrunnur myndi innihalda tugþúsundir bóka og notanda.
 
 Til að útfæra með postgres nýtum við [`LIMIT` og `OFFSET`](https://www.postgresql.org/docs/current/static/queries-limit.html) í fyrirspurnum. Við útfærum almennu fyrirspurnina (með `ORDER BY <dálk til að raða eftir>`) en bætum síðan við t.d. `LIMIT 10 OFFSET 0` sem biður um fyrstu 10 niðurstöður, `LIMIT 10 OFFSET 10` myndi skila okkur næstu 10, þ.e. frá 11-20 o.s.fr.
 
