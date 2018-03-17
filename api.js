@@ -21,8 +21,8 @@ async function categoriesGet(req, res) {
 }
 
 async function categoryPost(req, res) {
-  const { catName } = req.body;
-  const data = await postCategory({ catName });
+  const { category } = req.body;
+  const data = await postCategory(category);
   if (data.error === null) {
     return res.json(data.item);
   }

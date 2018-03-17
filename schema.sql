@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS readBooks;
+DROP TABLE IF EXISTS books;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS categories;
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(64) UNIQUE NOT NULL,
@@ -19,7 +23,7 @@ CREATE TABLE books (
     description TEXT,
     category VARCHAR(255) UNIQUE NOT NULL,
     isbn10 VARCHAR(10) UNIQUE,
-    published DATE,
+    published INT,
     pagecount INT,
     language VARCHAR(2),
     FOREIGN KEY (category) REFERENCES categories (category)
