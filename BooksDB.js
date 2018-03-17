@@ -263,9 +263,6 @@ async function patchBookId({ id } = {}) {
   return result;
 }
 
-
-
-
 module.exports = {
   getCategories,
   postCategory,
