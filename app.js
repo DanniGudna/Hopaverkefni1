@@ -2,20 +2,69 @@ require('dotenv').config();
 
 const path = require('path');
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const helmet = require('helmet');
+const passport = require('passport');
+const { Strategy } = require('passport-local');
 
+const categories = require('./categories');
+const index = require('./index');
 const admin = require('./admin');
 const books = require('./books');
 const users = require('./users');
 
 const app = express();
 
-app.use(express.urlencoded({ extended: true }));
-
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+const sessionSecret = 'sec';
+
+app.use(helmet());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser(sessionSecret));
+app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+}));
+
+function strat(username, password, done) {
+  users
+    .findByUsername(username)
+    .then((user) => {
+      if (!user) {
+        return done(null, false);
+      }
+
+      return users.comparePasswords(password, user);
+    })
+    .then(res => done(null, res))
+    .catch((err) => {
+      done(err);
+    });
+}
+
+passport.use(new Strategy(strat));
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  users
+    .findById(id)
+    .then(user => done(null, user))
+    .catch(err => done(err));
+});
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use('/', index);
 
 app.get('/login', (req, res) => {
   let message = '';
