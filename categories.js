@@ -1,6 +1,6 @@
-require('dotenv').config();
-const { Client } = require('pg');
-const xss = require('xss');
+require('dotenv').config(); // eslint-disable-line
+const { Client } = require('pg'); // eslint-disable-line
+const xss = require('xss'); // eslint-disable-line
 // const validator = require('validator');
 
 const connectionString = 'postgres://:@localhost/v3';
@@ -70,7 +70,6 @@ async function postCategory(category) {
 */
   return result;
 }
-
 
 module.exports = {
   getCategories,

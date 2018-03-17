@@ -14,6 +14,10 @@ const {
 
 const router = express.Router();
 
+function catchErrors(fn) {
+  return (req, res, next) => fn(req, res, next).catch(next);
+}
+
 // async function getCategories(req, res) {
 //   const allCategories = await ****;
 //   res.json(allCategories.rows);
@@ -28,6 +32,7 @@ const router = express.Router();
 //   return res.json(data.erorr);
 // }
 
+// GET á /books
 async function booksGet(req, res) {
   const allBooks = await getBooks();
   if (allBooks.error === null) {
@@ -36,7 +41,7 @@ async function booksGet(req, res) {
   return res.json(allBooks.error);
 }
 
-
+// POST á /books
 async function booksPost(req, res) {
   const { book } = req.body;
   const data = await postBook(book);
@@ -46,6 +51,7 @@ async function booksPost(req, res) {
   return res.json(data.error);
 }
 
+// get á /books/id
 async function booksID(req, res) {
   const { id } = req.params;
   const get = await getBookId(id);
@@ -54,3 +60,7 @@ async function booksID(req, res) {
   }
   return res.status(404).json(get.error);
 }
+
+router.get('/books', catchErrors(booksGet));
+router.post('/books', catchErrors(booksPost));
+router.put('/books/:id', catchErrors(booksID));

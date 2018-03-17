@@ -1,9 +1,9 @@
-require('dotenv').config();
+require('dotenv').config(); // eslint-disable-line
 
-const fs = require('fs');
-const util = require('util');
+const fs = require('fs'); // eslint-disable-line
+const util = require('util'); // eslint-disable-line
 
-const { Client } = require('pg');
+const { Client } = require('pg'); // eslint-disable-line
 
 const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
 
