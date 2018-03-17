@@ -1,8 +1,161 @@
-// llalalal
+const { Client } = require('pg');
+const xss = require('xss');
+// const validator = require('validator');
+
+
+const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
+/**
+* /categories` GET` skilar _síðu_ af flokkum
+*
+* @param {Object} books - Object
+* @param {number} books.limit - How many books should show up on the page
+* @param {number} books.offset - How many books should be skipped befor starting
+* the limit, should start at 0 then increment by X
+* @returns {Promise} Promise representing an array of the books for the page
+*/
+async function getCategories({ limit, offset } = {}) {
+  const client = new Client({ connectionString });
+  const q = 'SELECT category FROM categories LIMIT $1 OFFSET $2';
+  const result = ({ error: '', item: '' });
+  // TODO: gera validation fall
+  // const validation = await validateText(category, limit, offset);
+  // if (validation.length === 0) {
+  try {
+    await client.connect();
+    const dbResult = await client.query(q, [xss(limit), xss(offset)]);
+    await client.end();
+    result.item = dbResult.rows;
+    result.error = null;
+  } catch (err) {
+    console.info(err);
+  }
+
+  /* } else {
+   result.item = null;
+   result.error = validation;
+ }
+*/
+  return result;
+}
+
+/**
+* Creates a new category.
+* /categories` POST býr til nýjan flokk og skilar
+*
+* @param {string} category - Category to create
+* @returns {Promise} Promise representing an array of the books for the page
+*/
+async function postCategory(category) {
+  const client = new Client({ connectionString });
+  const q = 'INSERT INOT categories (category) VALUES category';
+  const result = ({ error: '', item: '' });
+  // TODO: gera validation fall
+  // const validation = await validateText(category, limit, offset);
+  // if (validation.length === 0) {
+  try {
+    await client.connect();
+    const dbResult = await client.query(q, [xss(category), xss(limit), xss(offset)]);
+    await client.end();
+    result.item = dbResult.rows;
+    result.error = null;
+  } catch (err) {
+    console.info(err);
+  }
+
+  /* } else {
+   result.item = null;
+   result.error = validation;
+ }
+*/
+  return result;
+}
+
+/**
+* Get a page of books.
+* /books` GET` skilar _síðu_ af bokum
+*
+* @param {Object} books - Object
+* @param {number} books.limit - How many books should show up on the page
+* @param {number} books.offset - How many books should be skipped befor starting
+* the limit, should start at 0 then increment by X - ath veit ekki hvort að þurfi
+* @returns {Promise} Promise representing an array of the books for the page
+*/
+async function getCategories({ limit, offset } = {}) {
+  const client = new Client({ connectionString });
+  const q = 'SELECT * FROM books LIMIT $1 OFFSET $2';
+  const result = ({ error: '', item: '' });
+  // TODO: gera validation fall
+  // const validation = await validateText(category, limit, offset);
+  // if (validation.length === 0) {
+  try {
+    await client.connect();
+    const dbResult = await client.query(q, [xss(limit), xss(offset)]);
+    await client.end();
+    result.item = dbResult.rows;
+    result.error = null;
+  } catch (err) {
+    console.info(err);
+  }
+
+  /* } else {
+   result.item = null;
+   result.error = validation;
+ }
+*/
+  return result;
+}
+
+
+/**
+* create a book
+* /books` POST` Býr til nýja bók
+* @param {Object} books - Object
+* @param {string} books.title - Title of the book
+* @param {string} books.isbn13 - isbn13 number of book- unique
+* @param {string} books.author - author of book
+* @param {string} books.description - description of book ( not nesecary?)
+* @param {string} books.category - category of book, refrence table categories
+* @param {string} books.isbn10 - isbn10 number - unique
+* @param {string} books.published - date of publication
+* @param {number} books.pagecount - number of pages
+* @param {string} books.language - language of the book
+* @returns {Promise} Promise representing an array of the books for the page
+*/
+async function getCategories({ title, isbn13, author,description, category, isbn10,
+  published,pagecount, language } = {}) {
+  const client = new Client({ connectionString });
+  const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES (title, isbn13, author,description, category, isbn10,published,pagecount, language)';
+  const result = ({ error: '', item: '' });
+  // TODO: gera validation fall
+  // const validation = await validateText(category, limit, offset);
+  // if (validation.length === 0) {
+  try {
+    await client.connect();
+    const dbResult = await client.query(q, [xss(limit), xss(offset)]);
+    await client.end();
+    result.item = dbResult.rows;
+    result.error = null;
+  } catch (err) {
+    console.info(err);
+  }
+
+  /* } else {
+   result.item = null;
+   result.error = validation;
+ }
+*/
+  return result;
+}
+
+module.exports = {
+  getCategories,
+};
+
+
 /*
 
-  - `GET` skilar _síðu_ af flokkum
-  - `POST` býr til nýjan flokk og skilar
+  - `GET` skilar _síðu_ af flokkum check
+  - `POST` býr til nýjan flokk og skilar check
 * `/books`
   - `GET` skilar _síðu_ af bókum
   - `POST` býr til nýja bók ef hún er gild og skilar
@@ -20,40 +173,3 @@
   - `DELETE` eyðir lestri bókar fyrir innskráðann notanda
 
   */
-
-/**
-* Get a page of books.
-*
-* @param {Object} books - Note to create
-* @param {string} books.category - Category of book
-* @param {number} books.limit - How many books should show up on the page
-* @param {number} books.offset - How many books should be skipped befor starting
-* the limit
-* @returns {Promise} Promise representing an array of the books for the page
-*/
-async function getCategory({ category, limit, offset } = {}) {
- /* todo útfæra */
- const client = new Client({ connectionString });
- const q = 'SELECT * FROM books WHERE category = $1 ORDER BY id LIMIT $2 OFFSET $3';
- const result = ({ error: '', item: '' });
- aijsfoasjf
- asfasf= asf = asd
-//TODO: gera validation fall
- //const validation = await validateText(category, limit, offset);
- //if (validation.length === 0) {
-   try {
-     await client.connect();
-     const dbResult = await client.query(q, [xss(category), xss(limit), xss(offset)]);
-     await client.end();
-     result.item = dbResult.rows[index];
-     result.error = null;
-   } catch (err) {
-     console.info(err);
-   }
- /*} else {
-   result.item = null;
-   result.error = validation;
- }
-
- return result;
-}
