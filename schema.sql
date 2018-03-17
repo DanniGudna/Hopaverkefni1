@@ -23,7 +23,7 @@ CREATE TABLE books (
     description TEXT,
     category VARCHAR(255) UNIQUE NOT NULL,
     isbn10 VARCHAR(10) UNIQUE,
-    published INT,
+    published DATE,
     pagecount INT,
     language VARCHAR(2),
     FOREIGN KEY (category) REFERENCES categories (category)
