@@ -8,23 +8,24 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 /**
 * Get a page of books.
 * /books` GET` skilar _síðu_ af bokum
-*
+* TODO: athugaau
 * @param {Object} books - Object
 * @param {number} books.limit - How many books should show up on the page
 * @param {number} books.offset - How many books should be skipped befor starting
 * the limit, should start at 0 then increment by X - ath veit ekki hvort að þurfi
-* @returns {Promise} Promise representing an array of the books for the page
+* @returns {Promise} Promise representing an object containing either array of
+* the books for the page or the error message
 */
-async function getBooks({ limit, offset } = {}) {
+async function getBooks() {
   const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books LIMIT $1 OFFSET $2';
+  const q = 'SELECT * FROM books LIMIT 10 OFFSET 0';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const dbResult = await client.query(q, [xss(limit), xss(offset)]);
+    const dbResult = await client.query(q);
     await client.end();
     result.item = dbResult.rows;
     result.error = null;
@@ -51,7 +52,7 @@ async function getBooks({ limit, offset } = {}) {
 * @param {string} books.description - description of book ( not nesecary?)
 * @param {string} books.category - category of book, refrence table categories
 * @param {string} books.isbn10 - isbn10 number - unique
-* @param {string} books.published - date of publication
+* @param {number} books.published - date of publication
 * @param {number} books.pagecount - number of pages
 * @param {string} books.language - language of the book
 * @returns {Promise} Promise representing an array of the books for the page
@@ -63,6 +64,8 @@ async function postBook({
   const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9)';
   const result = ({ error: '', item: '' });
   const index = 0;
+  console.log(published);
+  console.log(pagecount);
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
@@ -70,7 +73,7 @@ async function postBook({
     await client.connect();
     const dbResult = await client.query(q, [
       xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10),
-      xss(published), xss(pagecount), xss(language)]);
+      published, pagecount, xss(language)]);
     await client.end();
     result.item = dbResult.rows[index];
     result.error = null;

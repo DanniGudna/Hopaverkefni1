@@ -10,7 +10,7 @@ const {
   postBook,
   getBookId,
   patchBookId,
-} = require('./books');
+} = require('./booksDB');
 
 const router = express.Router();
 
@@ -40,8 +40,14 @@ async function booksGet(req, res) {
 
 // POST á /books
 async function booksPost(req, res) {
-  const { book } = req.body;
-  const data = await postBook(book);
+  const {
+    title, isbn13, author, description, category, isbn10, published, pagecount, language
+  }
+ = req.body;
+ console.log("this " + title);
+  const data = await postBook({
+    title, isbn13, author, description, category, isbn10, published, pagecount, language
+  });
   if (data.error === null) {
     return res.json(data.item);
   }
