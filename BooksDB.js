@@ -151,11 +151,50 @@ async function postBook({
   return result;
 }
 
+/**
+* Get a single book
+*`/books/:id`
+*  - `GET` skilar stakri bók
+*
+* @param {Object} books - Object
+* @param {number} books.id - How many books should show up on the page
+* @returns {Promise} Promise representing an array of the books for the page
+*/
+async function getBookId({ id } = {}) {
+  const client = new Client({ connectionString });
+  const q = 'SELECT * FROM books WHERE id = %1';
+  const result = ({ error: '', item: '' });
+  // TODO: gera validation fall
+  // const validation = await validateText(category, limit, offset);
+  // if (validation.length === 0) {
+  try {
+    await client.connect();
+    const dbResult = await client.query(q, [xss(id)]);
+    await client.end();
+    result.item = dbResult.rows;
+    result.error = null;
+  } catch (err) {
+    console.info(err);
+  }
+
+  /* } else {
+   result.item = null;
+   result.error = validation;
+ }
+*/
+  return result;
+}
+
+
+
+
+
 module.exports = {
   getCategories,
   postCategory,
   getBooks,
   postBook,
+  getBookId,
 };
 
 
@@ -164,7 +203,7 @@ module.exports = {
   - `GET` skilar _síðu_ af flokkum check
   - `POST` býr til nýjan flokk og skilar check
 * `/books`
-  - `GET` skilar _síðu_ af bókum
+  - `GET` skilar _síðu_ af bókum check
   - `POST` býr til nýja bók ef hún er gild og skilar
 * `/books?search=query`
   - `GET` skilar _síðu_ af bókum sem uppfylla leitarskilyrði, sjá að neðan
@@ -179,4 +218,39 @@ module.exports = {
 * `/users/me/read/:id`
   - `DELETE` eyðir lestri bókar fyrir innskráðann notanda
 
+  /**
+  * Get a page of books.
+  * /books` GET` skilar _síðu_ af bokum
+  *
+  * @param {Object} books - Object
+  * @param {number} books.limit - How many books should show up on the page
+  * @param {number} books.offset - How many books should be skipped befor starting
+  * the limit, should start at 0 then increment by X - ath veit ekki hvort að þurfi
+  * @returns {Promise} Promise representing an array of the books for the page
   */
+  /*async function getBooks({ limit, offset } = {}) {
+    const client = new Client({ connectionString });
+    const q = 'SELECT * FROM books LIMIT $1 OFFSET $2';
+    const result = ({ error: '', item: '' });
+    // TODO: gera validation fall
+    // const validation = await validateText(category, limit, offset);
+    // if (validation.length === 0) {
+    try {
+      await client.connect();
+      const dbResult = await client.query(q, [xss(limit), xss(offset)]);
+      await client.end();
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.info(err);
+    }
+
+    /* } else {
+     result.item = null;
+     result.error = validation;
+   }
+  *//*
+    return result;
+  }
+
+*/
