@@ -3,7 +3,7 @@ const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
 // const validator = require('validator');
 
-const connectionString = 'postgres://:@localhost/v3';
+const connectionString = 'postgres://:@localhost/hopverkefni';
 
 /**
 * /categories` GET` skilar _síðu_ af flokkum
@@ -47,16 +47,19 @@ async function getCategories({ limit, offset } = {}) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function postCategory(category) {
+  console.log("TEST");
   const client = new Client({ connectionString });
-  const q = 'INSERT INOT categories (category) VALUES $1';
+  console.log(category);
+  const q = 'INSERT INTO categories (category) VALUES ($1)';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const dbResult = await client.query(q, [xss(category)]);
+    const dbResult = await client.query(q, [category]);
     await client.end();
+    console.log(dbResult.rows);
     result.item = dbResult.rows;
     result.error = null;
   } catch (err) {
