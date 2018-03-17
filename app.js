@@ -1,7 +1,5 @@
 require('dotenv').config(); // eslint-disable-line
 
-const path = require('path');
-
 const express = require('express'); // eslint-disable-line
 const cookieParser = require('cookie-parser'); // eslint-disable-line
 const session = require('express-session'); // eslint-disable-line
