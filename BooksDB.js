@@ -47,14 +47,14 @@ async function getCategories({ limit, offset } = {}) {
 */
 async function postCategory(category) {
   const client = new Client({ connectionString });
-  const q = 'INSERT INOT categories (category) VALUES category';
+  const q = 'INSERT INOT categories (category) VALUES $1';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const dbResult = await client.query(q, [xss(category), xss(limit), xss(offset)]);
+    const dbResult = await client.query(q, [xss(category)]);
     await client.end();
     result.item = dbResult.rows;
     result.error = null;
@@ -80,7 +80,7 @@ async function postCategory(category) {
 * the limit, should start at 0 then increment by X - ath veit ekki hvort að þurfi
 * @returns {Promise} Promise representing an array of the books for the page
 */
-async function getCategories({ limit, offset } = {}) {
+async function getBooks({ limit, offset } = {}) {
   const client = new Client({ connectionString });
   const q = 'SELECT * FROM books LIMIT $1 OFFSET $2';
   const result = ({ error: '', item: '' });
@@ -121,19 +121,23 @@ async function getCategories({ limit, offset } = {}) {
 * @param {string} books.language - language of the book
 * @returns {Promise} Promise representing an array of the books for the page
 */
-async function getCategories({ title, isbn13, author,description, category, isbn10,
-  published,pagecount, language } = {}) {
+async function postBook({
+  title, isbn13, author, description, category, isbn10, published, pagecount, language,
+} = {}) {
   const client = new Client({ connectionString });
-  const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES (title, isbn13, author,description, category, isbn10,published,pagecount, language)';
+  const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9)';
   const result = ({ error: '', item: '' });
+  const index = 0;
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const dbResult = await client.query(q, [xss(limit), xss(offset)]);
+    const dbResult = await client.query(q, [
+      xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10),
+      xss(published), xss(pagecount), xss(language)]);
     await client.end();
-    result.item = dbResult.rows;
+    result.item = dbResult.rows[index];
     result.error = null;
   } catch (err) {
     console.info(err);
@@ -149,6 +153,9 @@ async function getCategories({ title, isbn13, author,description, category, isbn
 
 module.exports = {
   getCategories,
+  postCategory,
+  getBooks,
+  postBook,
 };
 
 
