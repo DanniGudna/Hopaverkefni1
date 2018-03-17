@@ -19,7 +19,6 @@ app.use('/', api);
 const sessionSecret = 'sec';
 
 app.use(helmet());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser(sessionSecret));
 app.use(express.urlencoded({ extended: true }));
 
@@ -68,7 +67,7 @@ app.get('/login', (req, res) => {
     message = req.session.messages.join(', ');
   }
 
-  res.render('login', { showLogin: false, message, title: 'Innskráning' });
+  res.json('test');
 });
 
 app.post('/login', (req, res) => {
@@ -92,12 +91,12 @@ app.post('/login', (req, res) => {
 
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
-  res.status(404).render('error', { title: '404' });
+  res.status(404).json({ title: '404' });
 }
 
 function errorHandler(err, req, res, next) { // eslint-disable-line
   console.error(err);
-  res.status(500).render('error', { err });
+  res.status(500).json({ err });
 }
 
 app.use(notFoundHandler);
