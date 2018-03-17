@@ -1,8 +1,8 @@
 const express = require('express');
 
 const {
-  categories,
-  createCategory,
+  getCategories,
+  postCategory,
 } = require('./categories');
 
 const {
@@ -14,23 +14,20 @@ const {
 
 const router = express.Router();
 
-function catchErrors(fn) {
-  return (req, res, next) => fn(req, res, next).catch(next);
+
+async function categoriesGet(req, res) {
+  const allCategories = await getCategories();
+  return res.json(allCategories.rows);
 }
 
-// async function getCategories(req, res) {
-//   const allCategories = await ****;
-//   res.json(allCategories.rows);
-// }
-
-// async function postCategories(req, res) {
-//   const { catName } = req.body;
-//   const data = await create({ catName});
-//   if (data.error === null) {
-//     return res.json(data.item);
-//   }
-//   return res.json(data.erorr);
-// }
+async function categoryPost(req, res) {
+  const { catName } = req.body;
+  const data = await postCategory({ catName });
+  if (data.error === null) {
+    return res.json(data.item);
+  }
+  return res.json(data.erorr);
+}
 
 // GET á /books
 async function booksGet(req, res) {
@@ -61,6 +58,15 @@ async function booksID(req, res) {
   return res.status(404).json(get.error);
 }
 
-router.get('/books', catchErrors(booksGet));
-router.post('/books', catchErrors(booksPost));
-router.put('/books/:id', catchErrors(booksID));
+function catchErrors(fn) {
+  return (req, res, next) => fn(req, res, next).catch(next);
+}
+
+// Category routes
+router.get('/categories/', catchErrors(categoriesGet));
+router.post('/categories/', catchErrors(categoryPost));
+
+// Books routes
+router.post('/books/', catchErrors(booksPost));
+router.get('/books/', catchErrors(booksGet));
+router.get('/books/:id', catchErrors(booksID));

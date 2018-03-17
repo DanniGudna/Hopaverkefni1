@@ -1,6 +1,7 @@
 require('dotenv').config(); // eslint-disable-line
 
 const path = require('path');
+
 const express = require('express'); // eslint-disable-line
 const cookieParser = require('cookie-parser'); // eslint-disable-line
 const session = require('express-session'); // eslint-disable-line
@@ -8,16 +9,14 @@ const helmet = require('helmet'); // eslint-disable-line
 const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
 
-// const categories = require('./categories');
+const categories = require('./categories');
 // const index = require('./index');
 const admin = require('./admin'); // eslint-disable-line
 const books = require('./books'); // eslint-disable-line
 const users = require('./users'); // eslint-disable-line
 
-const app = express();
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+const app = express();
 
 const sessionSecret = 'sec';
 
@@ -63,8 +62,6 @@ passport.deserializeUser((id, done) => {
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-// app.use('/', index);
 
 app.get('/login', (req, res) => {
   let message = '';
