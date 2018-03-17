@@ -70,3 +70,4 @@ router.post('/categories/', catchErrors(categoryPost));
 router.post('/books/', catchErrors(booksPost));
 router.get('/books/', catchErrors(booksGet));
 router.get('/books/:id', catchErrors(booksID));
+module.exports = router;

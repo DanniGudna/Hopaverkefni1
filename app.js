@@ -9,14 +9,12 @@ const helmet = require('helmet'); // eslint-disable-line
 const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
 
-const categories = require('./categories');
-// const index = require('./index');
-const admin = require('./admin'); // eslint-disable-line
-const books = require('./books'); // eslint-disable-line
-const users = require('./users'); // eslint-disable-line
-
+const api = require('./api');
 
 const app = express();
+
+app.use(express.json());
+app.use('/', api);
 
 const sessionSecret = 'sec';
 
@@ -92,9 +90,6 @@ app.post('/login', (req, res) => {
 
 });
 
-app.use('/admin', admin);
-app.use('/books', books);
-app.use('/users', users);
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).render('error', { title: '404' });
