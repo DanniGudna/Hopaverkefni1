@@ -117,11 +117,3 @@ insert into books (title, isbn13, author, description, categoryName) values ('Gu
 insert into books (title, isbn13, author, description, categoryName) values ('Lawnmower Man, The', '389657912-6', 'Perry Foxworthy', 'Cross-platform zero administration hierarchy', 'Horror');
 insert into books (title, isbn13, author, description, categoryName) values ('Kismet', '777686549-4', 'Curtis Clutterham', 'Realigned 3rd generation help-desk', 'Fantasy');
 insert into books (title, isbn13, author, description, categoryName) values ('Carriage to Vienna', '823365975-4', 'Giustina Seyler', 'De-engineered local project', 'War');
-insert into readBooks (userID, bookID, rating, review) values (1, 2, 4, 'Fully-configurable systematic initiative');
-insert into readBooks (userID, bookID, rating, review) values (1, 3, 5, 'Reduced well-modulated solution');
-insert into readBooks (userID, bookID, rating, review) values (1, 5, 5, 'Quality-focused client-server migration');
-insert into readBooks (userID, bookID, rating, review) values (24, 3, 5, 'Reduced well-modulated solution');
-insert into readBooks (userID, bookID, rating, review) values (16, 5, 5, 'Quality-focused client-server migration');
-insert into readBooks (userID, bookID, rating, review) values (27, 4, 2, 'Horizontal 6th generation pricing structure');
-insert into readBooks (userID, bookID, rating, review) values (61, 1, 5, 'Polarised exuding info-mediaries');
-insert into readBooks (userID, bookID, rating, review) values (6, 6, 5, 'User-friendly system-worthy collaboration');
