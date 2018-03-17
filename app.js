@@ -1,18 +1,20 @@
-require('dotenv').config();
+require('dotenv').config(); // eslint-disable-line
 
 const path = require('path');
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
-const helmet = require('helmet');
-const passport = require('passport');
-const { Strategy } = require('passport-local');
+
+const express = require('express'); // eslint-disable-line
+const cookieParser = require('cookie-parser'); // eslint-disable-line
+const session = require('express-session'); // eslint-disable-line
+const helmet = require('helmet'); // eslint-disable-line
+const passport = require('passport'); // eslint-disable-line
+const { Strategy } = require('passport-local'); // eslint-disable-line
 
 const categories = require('./categories');
-//const index = require('./index');
-const admin = require('./admin');
-const books = require('./books');
-const users = require('./users');
+// const index = require('./index');
+const admin = require('./admin'); // eslint-disable-line
+const books = require('./books'); // eslint-disable-line
+const users = require('./users'); // eslint-disable-line
+
 
 const app = express();
 

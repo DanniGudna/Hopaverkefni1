@@ -14,6 +14,7 @@ const {
 
 const router = express.Router();
 
+
 async function categoriesGet(req, res) {
   const allCategories = await getCategories();
   return res.json(allCategories.rows);
@@ -28,6 +29,7 @@ async function categoryPost(req, res) {
   return res.json(data.erorr);
 }
 
+// GET á /books
 async function booksGet(req, res) {
   const allBooks = await getBooks();
   if (allBooks.error === null) {
@@ -36,7 +38,7 @@ async function booksGet(req, res) {
   return res.json(allBooks.error);
 }
 
-
+// POST á /books
 async function booksPost(req, res) {
   const { book } = req.body;
   const data = await postBook(book);
@@ -46,6 +48,7 @@ async function booksPost(req, res) {
   return res.json(data.error);
 }
 
+// get á /books/id
 async function booksID(req, res) {
   const { id } = req.params;
   const get = await getBookId(id);
