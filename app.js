@@ -8,8 +8,8 @@ const helmet = require('helmet');
 const passport = require('passport');
 const { Strategy } = require('passport-local');
 
-const categories = require('./categories');
-const index = require('./index');
+//const categories = require('./categories');
+//const index = require('./index');
 const admin = require('./admin');
 const books = require('./books');
 const users = require('./users');
