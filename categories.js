@@ -1,9 +1,38 @@
 require('dotenv').config(); // eslint-disable-line
 const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
-// const validator = require('validator');
+const validator = require('validator'); // eslint-disable-line
 
 const connectionString = 'postgres://:@localhost/hopverkefni';
+
+/**
+ * Validates title,text and datetime
+ *
+ * @param {string} title - Title of note
+ * @param {string} text - Text of note
+ * @param {string} datetime - Datetime of note
+ *
+ * @returns {Promise} Promise representing the errors if there are any
+ */
+async function validateText(title, text, datetime) {
+  const errors = [];
+  // title check
+  if (!validator.isLength(title, { min: 1, max: 255 })) {
+    errors.push({ field: 'Title', message: 'Title must be a string of length 1 to 255 characters' });
+  }
+
+  // text check
+  if (typeof text !== 'string') {
+    errors.push({ field: 'text', message: 'Text must be a string' });
+  }
+
+  // datetime check
+  if (!validator.isISO8601(datetime)) {
+    errors.push({ field: 'datetime', message: 'Datetime must be a ISO 8601 date' });
+  }
+
+  return errors;
+}
 
 /**
 * /categories` GET` skilar _síðu_ af flokkum
