@@ -8,88 +8,16 @@ const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
 
 const api = require('./api');
+const users = require('./users');
 
 const app = express();
 
 app.use(express.json());
 app.use('/', api);
-
-const sessionSecret = 'sec';
-
-app.use(helmet());
-app.use(cookieParser(sessionSecret));
-app.use(express.urlencoded({ extended: true }));
-
-app.use(session({
-  secret: sessionSecret,
-  resave: false,
-  saveUninitialized: false,
-}));
-
-function strat(username, password, done) {
-  users
-    .findByUsername(username)
-    .then((user) => {
-      if (!user) {
-        return done(null, false);
-      }
-
-      return users.comparePasswords(password, user);
-    })
-    .then(res => done(null, res))
-    .catch((err) => {
-      done(err);
-    });
-}
-
-passport.use(new Strategy(strat));
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser((id, done) => {
-  users
-    .findById(id)
-    .then(user => done(null, user))
-    .catch(err => done(err));
-});
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.get('/login', (req, res) => {
-  let message = '';
-
-  if (req.session.messages && req.session.messages.length > 0) {
-    message = req.session.messages.join(', ');
-  }
-
-  res.json('test');
-});
-
-app.post('/login', (req, res) => {
-
-});
-
-app.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
-});
-
-// registers new user
-app.post('/register', (req, res) => {
-
-});
-
-// logs in new user
-app.post('/login', (req, res) => {
-
-});
-
+app.use('/users', users);
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
-  res.status(404).json({ title: '404' });
+  res.status(404).json({ title: '404 villa' });
 }
 
 function errorHandler(err, req, res, next) { // eslint-disable-line
