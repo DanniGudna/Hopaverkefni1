@@ -18,15 +18,21 @@ async function validateText(offset, category) {
   const errors = [];
 
   // offset check
-  console.log(typeof (offset));
+  // console.log("typeof: " + typeof (offset));
   if (typeof (offset) !== 'number') {
     errors.push({ field: 'offset', message: 'offset must be a number' });
   }
 
   // category check
-  if (!validator.isLength(category, { min: 1, max: 255 })) {
-    errors.push({ field: 'Category', message: 'Category must be a string of length 1 to 255 characters' });
+  if (typeof (category) !== 'string') {
+    errors.push({ field: 'Category', message: 'category must be a string' });
+  } else if (!validator.isLength(category, { min: 1, max: 255 })) {
+    errors.push({ field: 'Category', message: 'Category must be of length 1 to 255 characters' });
   }
+
+  sanitize(category).trim();
+  sanitize(offset).trim();
+
 
   return errors;
 }
@@ -40,15 +46,16 @@ async function validateText(offset, category) {
 */
 async function getCategories(offset) {
   const client = new Client({ connectionString });
-  console.log(offset);
-  const q = 'SELECT category FROM categories LIMIT 10 OFFSET $1';
+  const off = (typeof offset === 'undefined') ? 0 : offset;
+  console.log("off: " + off);
+  const q = 'SELECT category FROM categories LIMIT 15 OFFSET $1';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const dbResult = await client.query(q, [offset]);
+    const dbResult = await client.query(q, [off]);
     await client.end();
     result.item = dbResult.rows;
     result.error = null;
@@ -72,30 +79,27 @@ async function getCategories(offset) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function postCategory(category) {
-  console.log("TEST");
   const client = new Client({ connectionString });
-  console.log(category);
+  console.log("category: " + category);
   const q = 'INSERT INTO categories (category) VALUES ($1)';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
-  // const validation = await validateText(category, limit, offset);
-  // if (validation.length === 0) {
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [category]);
-    await client.end();
-    console.log(dbResult.rows);
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
+  const validation = await validateText(10, category);
+  if (validation.length === 0) {
+    try {
+      await client.connect();
+      const dbResult = await client.query(q, [category]);
+      await client.end();
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.info(err);
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
   }
 
-  /* } else {
-   result.item = null;
-   result.error = validation;
- }
-*/
   return result;
 }
 

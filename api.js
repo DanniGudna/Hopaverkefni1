@@ -1,23 +1,22 @@
-const express = require('express'); // eslint-disable-line
+const express = require('express');
 
 const {
   getCategories,
   postCategory,
-} = require('./categories'); // eslint-disable-line
+} = require('./categories');
 
 const {
   getBooks,
   postBook,
   getBookId,
   patchBookId,
-} = require('./booksDB'); // eslint-disable-line
+} = require('./booksDB');
 
 const router = express.Router();
 
 
 async function categoriesGet(req, res) {
   const { offset } = req.query;
-  console.log(offset);
   const allCategories = await getCategories(offset);
   return res.json(allCategories.item);
 }
@@ -28,12 +27,12 @@ async function categoryPost(req, res) {
   if (data.error === null) {
     return res.json(data.item);
   }
-  return res.json(data.erorr);
+  return res.json(data.error);
 }
 
 // GET á /books
 async function booksGet(req, res) {
-  let { offset } = req.query;
+  const { offset } = req.query;
   const allBooks = await getBooks(offset);
   if (allBooks.error === null) {
     return res.json(allBooks.item);
@@ -59,7 +58,6 @@ async function booksPost(req, res) {
 // get á /books/id
 async function booksID(req, res) {
   const { id } = req.params;
-  console.log(id);
   const get = await getBookId(id);
   if (get.length !== null) {
     return res.json(get);
