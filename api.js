@@ -16,8 +16,10 @@ const router = express.Router();
 
 
 async function categoriesGet(req, res) {
-  const allCategories = await getCategories();
-  return res.json(allCategories.rows);
+  const { offset } = req.query;
+  console.log(offset);
+  const allCategories = await getCategories(offset);
+  return res.json(allCategories.item);
 }
 
 async function categoryPost(req, res) {
@@ -31,7 +33,8 @@ async function categoryPost(req, res) {
 
 // GET á /books
 async function booksGet(req, res) {
-  const allBooks = await getBooks();
+  let { offset } = req.query;
+  const allBooks = await getBooks(offset);
   if (allBooks.error === null) {
     return res.json(allBooks.item);
   }
@@ -44,7 +47,6 @@ async function booksPost(req, res) {
     title, isbn13, author, description, category, isbn10, published, pagecount, language
   }
  = req.body;
- console.log("this " + title);
   const data = await postBook({
     title, isbn13, author, description, category, isbn10, published, pagecount, language
   });
@@ -57,6 +59,7 @@ async function booksPost(req, res) {
 // get á /books/id
 async function booksID(req, res) {
   const { id } = req.params;
+  console.log(id);
   const get = await getBookId(id);
   if (get.length !== null) {
     return res.json(get);
@@ -74,6 +77,6 @@ router.post('/categories/', catchErrors(categoryPost));
 
 // Books routes
 router.post('/books/', catchErrors(booksPost));
-router.get('/books/', catchErrors(booksGet));
+router.get('/books', catchErrors(booksGet));
 router.get('/books/:id', catchErrors(booksID));
 module.exports = router;
