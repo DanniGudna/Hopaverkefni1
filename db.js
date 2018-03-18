@@ -102,12 +102,12 @@ async function findById(id) {
   return null;
 }
 
-async function createUser(username, password) {
+async function createUser(username, password, name) {
   const hashedPassword = await bcrypt.hash(password, 11);
 
-  const q = 'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *';
+  const q = 'INSERT INTO users (username, passwd, fname) VALUES ($1, $2, $3) RETURNING *';
 
-  const result = await query(q, [username, hashedPassword]);
+  const result = await query(q, [username, hashedPassword, name]);
 
   return result.rows[0];
 }

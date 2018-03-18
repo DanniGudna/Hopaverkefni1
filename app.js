@@ -6,6 +6,7 @@ const session = require('express-session'); // eslint-disable-line
 const helmet = require('helmet'); // eslint-disable-line
 const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
+const users = require('./db.js');
 
 const api = require('./api');
 
@@ -101,10 +102,50 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
+async function validateUser(username, password) { // eslint-disable-line
+  if (typeof username !== 'string' || username.length < 2) {
+    return 'Notendanafn verður að vera amk 2 stafir';
+  }
+
+  const user = await users.findByUsername(username);
+
+  if (user) {
+    return 'Notendanafn er þegar skráð';
+  }
+
+  if (typeof password !== 'string' || password.length < 6) {
+    return 'Lykilorð verður að vera amk 6 stafir';
+  }
+}
+
+
+async function register(req, res, next) {
+  const { username, password, name } = req.body;
+
+  const validationMessage = await validateUser(username, password);
+
+  if (validationMessage) {
+    res.json({ message: validationMessage });
+  }
+
+  const result = await users.createUser(username, password, name);
+
+  // næsta middleware mun sjá um að skrá notanda inn því hann verður til
+  // og `username` og `password` verða ennþá sett sem rétt í `req`
+  next();
+}
+
 // registers new user
-app.post('/register', (req, res) => {
-  
-});
+app.post(
+  '/register',
+  register,
+  passport.authenticate('local', {
+    failureRedirect: '/login',
+  }),
+  (req, res) => {
+    res.redirect('/admin');
+  },
+);
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).json({ title: '404' });
