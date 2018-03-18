@@ -6,6 +6,7 @@ const session = require('express-session'); // eslint-disable-line
 const helmet = require('helmet'); // eslint-disable-line
 const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
+const users = require('./db.js');
 
 const api = require('./api');
 
@@ -26,20 +27,24 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-function strat(username, password, done) {
-  users
-    .findByUsername(username)
-    .then((user) => {
-      if (!user) {
-        return done(null, false);
-      }
+async function strat(username, password, done) {
+  const user = await users.findByUsername(username);
+  if (!user) {
+    return done(null, false);
+  }
 
-      return users.comparePasswords(password, user);
-    })
-    .then(res => done(null, res))
-    .catch((err) => {
-      done(err);
-    });
+  let result = false;
+  try {
+    result = await users.comparePasswords(password, user.passwd);
+  } catch (error) {
+    done(error);
+  }
+
+  if (result) {
+    return done(null, user);
+  }
+
+  return done(null, false);
 }
 
 passport.use(new Strategy(strat));
@@ -48,15 +53,28 @@ passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-passport.deserializeUser((id, done) => {
-  users
-    .findById(id)
-    .then(user => done(null, user))
-    .catch(err => done(err));
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await users.findById(id);
+    return done(null, user);
+  } catch (error) {
+    return done(error);
+  }
 });
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use((req, res, next) => {
+  if (req.isAuthenticated()) {
+    res.locals.user = req.user.name;
+  }
+
+  res.locals.showLogin = true;
+
+  next();
+});
+
 
 app.get('/login', (req, res) => {
   let message = '';
@@ -64,29 +82,69 @@ app.get('/login', (req, res) => {
   if (req.session.messages && req.session.messages.length > 0) {
     message = req.session.messages.join(', ');
   }
-
-  res.json('test');
+  res.json(message);
 });
 
-app.post('/login', (req, res) => {
-
-});
+app.post(
+  '/login',
+  passport.authenticate('local', {
+    failureMessage: 'Vitlaust notendanafn eða lykilorð',
+    failureRedirect: '/login',
+  }),
+  (req, res) => {
+    res.json({ message: 'you are logged inn' });
+  },
+);
 
 app.get('/logout', (req, res) => {
   req.logout();
   res.redirect('/');
 });
 
+async function validateUser(username, password) { // eslint-disable-line
+  if (typeof username !== 'string' || username.length < 2) {
+    return 'Notendanafn verður að vera amk 2 stafir';
+  }
+
+  const user = await users.findByUsername(username);
+
+  if (user) {
+    return 'Notendanafn er þegar skráð';
+  }
+
+  if (typeof password !== 'string' || password.length < 6) {
+    return 'Lykilorð verður að vera amk 6 stafir';
+  }
+}
+
+
+async function register(req, res, next) {
+  const { username, password, name } = req.body;
+
+  const validationMessage = await validateUser(username, password);
+
+  if (validationMessage) {
+    res.json({ message: validationMessage });
+  }
+
+  const result = await users.createUser(username, password, name);
+
+  // næsta middleware mun sjá um að skrá notanda inn því hann verður til
+  // og `username` og `password` verða ennþá sett sem rétt í `req`
+  next();
+}
+
 // registers new user
-app.post('/register', (req, res) => {
-
-});
-
-// logs in new user
-app.post('/login', (req, res) => {
-
-});
-
+app.post(
+  '/register',
+  register,
+  passport.authenticate('local', {
+    failureRedirect: '/login',
+  }),
+  (req, res) => {
+    res.redirect('/admin');
+  },
+);
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).json({ title: '404' });

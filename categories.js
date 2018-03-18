@@ -4,7 +4,7 @@ const xss = require('xss'); // eslint-disable-line
 const validator = require('validator'); // eslint-disable-line
 const { sanitize } = require('express-validator/filter'); // eslint-disable-line
 
-const connectionString = 'postgres://:@localhost/hopverkefni';
+const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
 
 /**
  * Validates offset
@@ -87,9 +87,10 @@ async function getCategories(offset) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function postCategory(category) {
+
   const client = new Client({ connectionString });
 
-  console.log("category: " + category);
+
   const q = 'INSERT INTO categories (category) VALUES ($1)';
   const check = 'SELECT ($1) FROM categories';
   const result = ({ error: '', item: '' });
