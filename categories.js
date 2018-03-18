@@ -2,27 +2,38 @@ require('dotenv').config(); // eslint-disable-line
 const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
 const validator = require('validator'); // eslint-disable-line
-const { sanitize } = require('express-validator/filter');
+const { sanitize } = require('express-validator/filter'); // eslint-disable-line
 
 const connectionString = 'postgres://:@localhost/hopverkefni';
 
 /**
- * Validates title,text and datetime
+ * Validates offset
  *
- * @param {number} offset - Title of note
- * @param {string} category - category to create
+ * @param {number} offset - offset
  *
- * @returns {Promise} Promise representing the errors if there are any
+ * @returns {array} an array of error messages if there are any
  */
-async function validateText(offset, category) {
+async function validateOffset(offset) {
   const errors = [];
 
   // offset check
-  // console.log("typeof: " + typeof (offset));
   if (typeof (offset) !== 'number') {
     errors.push({ field: 'offset', message: 'offset must be a number' });
   }
 
+  sanitize(offset).trim();
+
+  return errors;
+}
+
+/**
+ * Validates category
+ * @param {string} category - category to create
+ *
+ * @returns {array} returns array of objects of error messages
+ */
+async function validateCategory(category) {
+  const errors = [];
   // category check
   if (typeof (category) !== 'string') {
     errors.push({ field: 'Category', message: 'category must be a string' });
@@ -31,8 +42,6 @@ async function validateText(offset, category) {
   }
 
   sanitize(category).trim();
-  sanitize(offset).trim();
-
 
   return errors;
 }
@@ -46,28 +55,27 @@ async function validateText(offset, category) {
 */
 async function getCategories(offset) {
   const client = new Client({ connectionString });
-  const off = (typeof offset === 'undefined') ? 0 : offset;
-  console.log("off: " + off);
+  const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
+  console.log('OFF', off)
   const q = 'SELECT category FROM categories LIMIT 15 OFFSET $1';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
-  // const validation = await validateText(category, limit, offset);
-  // if (validation.length === 0) {
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [off]);
-    await client.end();
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
+  const validation = await validateOffset(off);
+  console.log(validation);
+  if (validation.length === 0) {
+    try {
+      await client.connect();
+      const dbResult = await client.query(q, [off]);
+      await client.end();
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.info(err);
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
   }
-
-  /* } else {
-   result.item = null;
-   result.error = validation;
- }
-*/
   return result;
 }
 
@@ -80,14 +88,22 @@ async function getCategories(offset) {
 */
 async function postCategory(category) {
   const client = new Client({ connectionString });
+
   console.log("category: " + category);
   const q = 'INSERT INTO categories (category) VALUES ($1)';
+  const check = 'SELECT ($1) FROM categories';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
-  const validation = await validateText(10, category);
+  const validation = await validateCategory(category);
   if (validation.length === 0) {
     try {
       await client.connect();
+      const duplicateCheck = await client.query(check, [category]);
+      if (duplicateCheck.rows.length > 0) {
+        result.error = ({ field: 'category', message: 'category exist' });
+        await client.end();
+        return result;
+      }
       const dbResult = await client.query(q, [category]);
       await client.end();
       result.item = dbResult.rows;

@@ -18,7 +18,10 @@ const router = express.Router();
 async function categoriesGet(req, res) {
   const { offset } = req.query;
   const allCategories = await getCategories(offset);
-  return res.json(allCategories.item);
+  if (allCategories.error === null) {
+    return res.json(allCategories.item);
+  }
+  return res.json(allCategories.error);
 }
 
 async function categoryPost(req, res) {
