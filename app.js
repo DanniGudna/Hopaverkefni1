@@ -6,6 +6,7 @@ const session = require('express-session'); // eslint-disable-line
 const helmet = require('helmet'); // eslint-disable-line
 const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
+const users = require('./db.js');
 
 const api = require('./api');
 const users = require('./users');
@@ -14,7 +15,6 @@ const app = express();
 
 app.use(express.json());
 app.use('/', api);
-app.use('/users', users);
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).json({ title: '404 villa' });

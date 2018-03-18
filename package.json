@@ -5,6 +5,7 @@
   "main": ".eslintrc.js",
   "dependencies": {
     "bcrypt": "^1.0.3",
+    "bcrypt-nodejs": "^0.0.3",
     "cookie-parser": "^1.4.3",
     "csvtojson": "^1.1.9",
     "dotenv": "^5.0.0",
@@ -28,6 +29,7 @@
   },
   "scripts": {
     "start": "node app.js",
+    "nodemon": "nodemon app.js",
     "eslint": "eslint *.js **/*.js"
   },
   "keywords": [],
