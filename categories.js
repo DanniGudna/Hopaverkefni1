@@ -14,16 +14,17 @@ const connectionString = 'postgres://:@localhost/hopverkefni';
 * the limit, should start at 0 then increment by X
 * @returns {Promise} Promise representing an array of the books for the page
 */
-async function getCategories({ limit, offset } = {}) {
+async function getCategories(offset) {
   const client = new Client({ connectionString });
-  const q = 'SELECT category FROM categories LIMIT $1 OFFSET $2';
+  console.log(offset);
+  const q = 'SELECT category FROM categories LIMIT 10 OFFSET $1';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const dbResult = await client.query(q, [xss(limit), xss(offset)]);
+    const dbResult = await client.query(q, [offset]);
     await client.end();
     result.item = dbResult.rows;
     result.error = null;

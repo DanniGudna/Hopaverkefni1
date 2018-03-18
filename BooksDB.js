@@ -16,16 +16,16 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 * @returns {Promise} Promise representing an object containing either array of
 * the books for the page or the error message
 */
-async function getBooks() {
+async function getBooks(offset = 0) {
   const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books LIMIT 10 OFFSET 0';
+  const q = 'SELECT * FROM books LIMIT 10 OFFSET ($1)';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const dbResult = await client.query(q);
+    const dbResult = await client.query(q, [offset]);
     await client.end();
     result.item = dbResult.rows;
     result.error = null;
@@ -100,7 +100,7 @@ async function postBook({
 */
 async function getBookId({ id } = {}) {
   const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books WHERE id = %1';
+  const q = 'SELECT * FROM books WHERE id = (%1)';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
