@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require('express'); // eslint-disable-line
 
-const { ensureLoggedIn, catchErrors } = require('./utils.js');
-const { fetchData } = require('./db.js');
+const { ensureLoggedIn, catchErrors } = require('./utils.js'); // eslint-disable-line
+const { fetchData } = require('./db.js'); // eslint-disable-line
 
 const router = express.Router();
 
