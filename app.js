@@ -26,20 +26,25 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-function strat(username, password, done) {
-  users
-    .findByUsername(username)
-    .then((user) => {
-      if (!user) {
-        return done(null, false);
-      }
+async function strat(username, password, done) {
+  const user = await users.findByUsername(username);
 
-      return users.comparePasswords(password, user);
-    })
-    .then(res => done(null, res))
-    .catch((err) => {
-      done(err);
-    });
+  if (!user) {
+    return done(null, false);
+  }
+
+  let result = false;
+  try {
+    result = await users.comparePasswords(password, user.password);
+  } catch (error) {
+    done(error);
+  }
+
+  if (result) {
+    return done(null, user);
+  }
+
+  return done(null, false);
 }
 
 passport.use(new Strategy(strat));
@@ -48,15 +53,28 @@ passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-passport.deserializeUser((id, done) => {
-  users
-    .findById(id)
-    .then(user => done(null, user))
-    .catch(err => done(err));
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await users.findById(id);
+    return done(null, user);
+  } catch (error) {
+    return done(error);
+  }
 });
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use((req, res, next) => {
+  if (req.isAuthenticated()) {
+    res.locals.user = req.user.name;
+  }
+
+  res.locals.showLogin = true;
+
+  next();
+});
+
 
 app.get('/login', (req, res) => {
   let message = '';
@@ -64,13 +82,19 @@ app.get('/login', (req, res) => {
   if (req.session.messages && req.session.messages.length > 0) {
     message = req.session.messages.join(', ');
   }
-
-  res.json('test');
+  res.json(message);
 });
 
-app.post('/login', (req, res) => {
-
-});
+app.post(
+  '/login',
+  passport.authenticate('local', {
+    failureMessage: 'Vitlaust notendanafn eða lykilorð',
+    failureRedirect: '/login',
+  }),
+  (req, res) => {
+    res.json({ message: 'you are logged inn' });
+  },
+);
 
 app.get('/logout', (req, res) => {
   req.logout();
@@ -79,14 +103,8 @@ app.get('/logout', (req, res) => {
 
 // registers new user
 app.post('/register', (req, res) => {
-
+  
 });
-
-// logs in new user
-app.post('/login', (req, res) => {
-
-});
-
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).json({ title: '404' });

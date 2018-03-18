@@ -3,7 +3,7 @@ const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
 const validator = require('validator'); // eslint-disable-line
 
-const connectionString = 'postgres://:@localhost/hopverkefni';
+const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
 
 /**
  * Validates title,text and datetime
@@ -78,7 +78,7 @@ async function getCategories(offset) {
 */
 async function postCategory(category) {
   console.log("TEST");
-  const client = new Client({ connectionString });
+  const client = await new Client({ connectionString });
   console.log(category);
   const q = 'INSERT INTO categories (category) VALUES ($1)';
   const result = ({ error: '', item: '' });
