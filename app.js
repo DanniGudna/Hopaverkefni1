@@ -29,14 +29,13 @@ app.use(session({
 
 async function strat(username, password, done) {
   const user = await users.findByUsername(username);
-
   if (!user) {
     return done(null, false);
   }
 
   let result = false;
   try {
-    result = await users.comparePasswords(password, user.password);
+    result = await users.comparePasswords(password, user.passwd);
   } catch (error) {
     done(error);
   }
