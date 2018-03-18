@@ -127,7 +127,7 @@ async function register(req, res, next) {
     res.json({ message: validationMessage });
   }
 
-  const result = await users.createUser(username, password, name);
+  const result = await users.createUser(username, password, name); // eslint-disable-line
 
   // næsta middleware mun sjá um að skrá notanda inn því hann verður til
   // og `username` og `password` verða ennþá sett sem rétt í `req`
