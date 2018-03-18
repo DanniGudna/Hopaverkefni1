@@ -2,34 +2,46 @@ require('dotenv').config(); // eslint-disable-line
 const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
 const validator = require('validator'); // eslint-disable-line
+const { sanitize } = require('express-validator/filter'); // eslint-disable-line
 
 const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
 
 /**
- * Validates title,text and datetime
+ * Validates offset
  *
- * @param {string} title - Title of note
- * @param {string} text - Text of note
- * @param {string} datetime - Datetime of note
+ * @param {number} offset - offset
  *
- * @returns {Promise} Promise representing the errors if there are any
+ * @returns {array} an array of error messages if there are any
  */
-async function validateText(title, text, datetime) {
+async function validateOffset(offset) {
   const errors = [];
-  // title check
-  if (!validator.isLength(title, { min: 1, max: 255 })) {
-    errors.push({ field: 'Title', message: 'Title must be a string of length 1 to 255 characters' });
+
+  // offset check
+  if (typeof (offset) !== 'number') {
+    errors.push({ field: 'offset', message: 'offset must be a number' });
   }
 
-  // text check
-  if (typeof text !== 'string') {
-    errors.push({ field: 'text', message: 'Text must be a string' });
+  sanitize(offset).trim();
+
+  return errors;
+}
+
+/**
+ * Validates category
+ * @param {string} category - category to create
+ *
+ * @returns {array} returns array of objects of error messages
+ */
+async function validateCategory(category) {
+  const errors = [];
+  // category check
+  if (typeof (category) !== 'string') {
+    errors.push({ field: 'Category', message: 'category must be a string' });
+  } else if (!validator.isLength(category, { min: 1, max: 255 })) {
+    errors.push({ field: 'Category', message: 'Category must be of length 1 to 255 characters' });
   }
 
-  // datetime check
-  if (!validator.isISO8601(datetime)) {
-    errors.push({ field: 'datetime', message: 'Datetime must be a ISO 8601 date' });
-  }
+  sanitize(category).trim();
 
   return errors;
 }
@@ -37,35 +49,33 @@ async function validateText(title, text, datetime) {
 /**
 * /categories` GET` skilar _síðu_ af flokkum
 *
-* @param {Object} books - Object
-* @param {number} books.limit - How many books should show up on the page
-* @param {number} books.offset - How many books should be skipped befor starting
+* @param {number} offset - How many books should be skipped befor starting
 * the limit, should start at 0 then increment by X
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function getCategories(offset) {
   const client = new Client({ connectionString });
-  console.log(offset);
-  const q = 'SELECT category FROM categories LIMIT 10 OFFSET $1';
+  const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
+  console.log('OFF', off)
+  const q = 'SELECT category FROM categories LIMIT 15 OFFSET $1';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
-  // const validation = await validateText(category, limit, offset);
-  // if (validation.length === 0) {
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [offset]);
-    await client.end();
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
+  const validation = await validateOffset(off);
+  console.log(validation);
+  if (validation.length === 0) {
+    try {
+      await client.connect();
+      const dbResult = await client.query(q, [off]);
+      await client.end();
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.info(err);
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
   }
-
-  /* } else {
-   result.item = null;
-   result.error = validation;
- }
-*/
   return result;
 }
 
@@ -77,30 +87,36 @@ async function getCategories(offset) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function postCategory(category) {
-  console.log("TEST");
-  const client = await new Client({ connectionString });
-  console.log(category);
+
+  const client = new Client({ connectionString });
+
+
   const q = 'INSERT INTO categories (category) VALUES ($1)';
+  const check = 'SELECT ($1) FROM categories';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
-  // const validation = await validateText(category, limit, offset);
-  // if (validation.length === 0) {
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [category]);
-    await client.end();
-    console.log(dbResult.rows);
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
+  const validation = await validateCategory(category);
+  if (validation.length === 0) {
+    try {
+      await client.connect();
+      const duplicateCheck = await client.query(check, [category]);
+      if (duplicateCheck.rows.length > 0) {
+        result.error = ({ field: 'category', message: 'category exist' });
+        await client.end();
+        return result;
+      }
+      const dbResult = await client.query(q, [category]);
+      await client.end();
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.info(err);
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
   }
 
-  /* } else {
-   result.item = null;
-   result.error = validation;
- }
-*/
   return result;
 }
 
