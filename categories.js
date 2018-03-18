@@ -2,33 +2,30 @@ require('dotenv').config(); // eslint-disable-line
 const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
 const validator = require('validator'); // eslint-disable-line
+const { sanitize } = require('express-validator/filter');
 
 const connectionString = 'postgres://:@localhost/hopverkefni';
 
 /**
  * Validates title,text and datetime
  *
- * @param {string} title - Title of note
- * @param {string} text - Text of note
- * @param {string} datetime - Datetime of note
+ * @param {number} offset - Title of note
+ * @param {string} category - category to create
  *
  * @returns {Promise} Promise representing the errors if there are any
  */
-async function validateText(title, text, datetime) {
+async function validateText(offset, category) {
   const errors = [];
-  // title check
-  if (!validator.isLength(title, { min: 1, max: 255 })) {
-    errors.push({ field: 'Title', message: 'Title must be a string of length 1 to 255 characters' });
+
+  // offset check
+  console.log(typeof (offset));
+  if (typeof (offset) !== 'number') {
+    errors.push({ field: 'offset', message: 'offset must be a number' });
   }
 
-  // text check
-  if (typeof text !== 'string') {
-    errors.push({ field: 'text', message: 'Text must be a string' });
-  }
-
-  // datetime check
-  if (!validator.isISO8601(datetime)) {
-    errors.push({ field: 'datetime', message: 'Datetime must be a ISO 8601 date' });
+  // category check
+  if (!validator.isLength(category, { min: 1, max: 255 })) {
+    errors.push({ field: 'Category', message: 'Category must be a string of length 1 to 255 characters' });
   }
 
   return errors;
@@ -37,9 +34,7 @@ async function validateText(title, text, datetime) {
 /**
 * /categories` GET` skilar _síðu_ af flokkum
 *
-* @param {Object} books - Object
-* @param {number} books.limit - How many books should show up on the page
-* @param {number} books.offset - How many books should be skipped befor starting
+* @param {number} offset - How many books should be skipped befor starting
 * the limit, should start at 0 then increment by X
 * @returns {Promise} Promise representing an array of the books for the page
 */
