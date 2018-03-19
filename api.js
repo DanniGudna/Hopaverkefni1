@@ -9,11 +9,12 @@ const {
   getBooks,
   postBook,
   getBookId,
-  patchBookId,
+  patchBookId, // eslint-disable-line
 } = require('./booksDB');
 
 const router = express.Router();
 
+router.get('/', catchErrors(categoriesGet));
 
 async function categoriesGet(req, res) {
   const { offset, limit } = req.query;
@@ -46,11 +47,11 @@ async function booksGet(req, res) {
 // POST á /books
 async function booksPost(req, res) {
   const {
-    title, isbn13, author, description, category, isbn10, published, pagecount, language
+    title, isbn13, author, description, category, isbn10, published, pagecount, language,
   }
  = req.body;
   const data = await postBook({
-    title, isbn13, author, description, category, isbn10, published, pagecount, language
+    title, isbn13, author, description, category, isbn10, published, pagecount, language,
   });
   if (data.error === null) {
     return res.json(data.item);

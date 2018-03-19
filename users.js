@@ -1,46 +1,44 @@
 const express = require('express');
+const { getAll, getOneById } = require('./users-api');
 
 const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
-// get all users
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+  const data = await getAll();
 
+  res.status(200).json(data);
 });
 
-// get user by id
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const { id } = req.params;
+  const { status, data } = await getOneById(id);
+
+  res.status(status).json(data);
 });
 
-// get me
 router.get('/me', (req, res) => {
-
+  res.send('hello');
 });
 
-// get my profile
-router.get('/me/profile', (req, res) => {
- 
+router.patch('/me', (req, res) => {
+  res.send('hello');
 });
 
-// get book read by user
-router.get('/:id/read', (req, res) => {
-  const { id } = req.params;
+router.post('/me/profile', (req, res) => {
+  res.send('hello');
 });
 
-// get books read by me
 router.get('/me/read', (req, res) => {
 
 });
 
-// add book read by me
 router.post('/me/read', (req, res) => {
 
 });
 
-// delete book i've read by id
 router.delete('/me/read/:id', (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
 });
 
 module.exports = router;

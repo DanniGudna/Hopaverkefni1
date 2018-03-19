@@ -62,14 +62,12 @@ async function validateCategory(category) {
 async function getCategories(offset, limit) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
-  console.log('OFF', off)
   const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
-  console.log('LIM', lim)
   const q = 'SELECT category FROM categories LIMIT $1 OFFSET $2';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   const validation = await validateOffset(off, lim);
-  console.log(validation);
+
   if (validation.length === 0) {
     try {
       await client.connect();
@@ -95,7 +93,6 @@ async function getCategories(offset, limit) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function postCategory(category) {
-
   const client = new Client({ connectionString });
 
 
