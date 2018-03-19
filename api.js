@@ -14,6 +14,7 @@ const {
 
 const router = express.Router();
 
+router.get('/', catchErrors(categoriesGet));
 
 async function categoriesGet(req, res) {
   const { offset } = req.query;
