@@ -35,9 +35,10 @@ async function categoryPost(req, res) {
 
 // GET á /books
 async function booksGet(req, res) {
-  const { offset } = req.query;
-  const allBooks = await getBooks(offset);
+  const { offset, limit } = req.query;
+  const allBooks = await getBooks(offset, limit);
   if (allBooks.error === null) {
+    console.log(`ping: ${  allBooks.item}`);
     return res.json(allBooks.item);
   }
   return res.json(allBooks.error);

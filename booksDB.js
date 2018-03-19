@@ -1,9 +1,10 @@
 const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
-// const validator = require('validator');
+const validator = require('validator'); // eslint-disable-line
+const { sanitize } = require('express-validator/filter'); // eslint-disable-line
 
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:123@localhost/hopverkefni';
+const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
 
 /**
 * Get a page of books.
@@ -16,28 +17,30 @@ const connectionString = process.env.DATABASE_URL || 'postgres://postgres:123@lo
 * @returns {Promise} Promise representing an object containing either array of
 * the books for the page or the error message
 */
-async function getBooks() {
+async function getBooks(offset, limit) {
   const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books LIMIT 10 OFFSET 0';
+  const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
+  const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
+  const q = 'SELECT * FROM books LIMIT ($1) OFFSET ($2)';
   const result = ({ error: '', item: '' });
-  // TODO: gera validation fall
-  // const validation = await validateText(category, limit, offset);
-  // if (validation.length === 0) {
-  try {
-    await client.connect();
-    const dbResult = await client.query(q);
-    await client.end();
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
-  }
 
-  /* } else {
-   result.item = null;
-   result.error = validation;
- }
-*/
+  const validation = await validateNum(lim);
+
+  if (validation.length === 0) {
+    try {
+      await client.connect();
+      const dbResult = await client.query(q, [Number(xss(lim)), Number(xss(off))]);
+      await client.end();
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.info(err);
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
+  }
+  console.log("result " + result);
   return result;
 }
 
@@ -64,8 +67,6 @@ async function postBook({
   const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9)';
   const result = ({ error: '', item: '' });
   const index = 0;
-  console.log(published);
-  console.log(pagecount);
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
@@ -100,7 +101,7 @@ async function postBook({
 */
 async function getBookId({ id } = {}) {
   const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books WHERE id = %1';
+  const q = 'SELECT * FROM books WHERE id = (%1)';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
@@ -145,7 +146,6 @@ async function patchBookId({ id } = {}) {
   try {
     await client.connect();
     const origResult = await client.query(origQ, [xss(id)]);
-    console.log(origResult);
     const dbResult = await client.query(q, [xss(id)]);
     await client.end();
     result.item = dbResult.rows;
@@ -163,30 +163,8 @@ async function patchBookId({ id } = {}) {
 }
 
 module.exports = {
-  // getCategories,
-  // postCategory,
   getBooks,
   postBook,
   getBookId,
   patchBookId,
 };
-
-/*
-  - `GET` skilar _síðu_ af flokkum check
-  - `POST` býr til nýjan flokk og skilar check
-* `/books`
-  - `GET` skilar _síðu_ af bókum check
-  - `POST` býr til nýja bók ef hún er gild og skilar
-* `/books?search=query`
-  - `GET` skilar _síðu_ af bókum sem uppfylla leitarskilyrði, sjá að neðan
-* `/books/:id`
-  - `GET` skilar stakri bók
-  - `PATCH` uppfærir bók
-* `/users/:id/read`
-  - `GET` skilar _síðu_ af lesnum bókum notanda
-* `/users/me/read`
-  - `GET` skilar _síðu_ af lesnum bókum innskráðs notanda
-  - `POST` býr til nýjan lestur á bók og skilar
-* `/users/me/read/:id`
-  - `DELETE` eyðir lestri bókar fyrir innskráðann notanda
-*/
