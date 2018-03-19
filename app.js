@@ -143,15 +143,15 @@ app.post('/image', uploads.single('image'), async (req, res, next) => {
 
   let upload = null;
 
-  /* try {
+  try {
     upload = await cloudinary.v2.uploader.upload(path);
   } catch (error) {
     console.error('Unable to upload file to cloudinary:', path);
     return next(error);
   }
 
-  const { secure_url } = upload; // eslint-disable-line */
-  const r = await users.insertPic(res.locals.user, 'asdfadsf');
+  const { secure_url } = upload; // eslint-disable-line
+  const r = await users.insertPic(res.locals.user, secure_url);
   return res.json({ user: r });
 });
 
