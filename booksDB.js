@@ -64,8 +64,6 @@ async function postBook({
   const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9)';
   const result = ({ error: '', item: '' });
   const index = 0;
-  console.log(published);
-  console.log(pagecount);
   // TODO: gera validation fall
   // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
@@ -144,8 +142,7 @@ async function patchBookId({ id } = {}) {
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const origResult = await client.query(origQ, [xss(id)]);
-    console.log(origResult);
+    const origResult = await client.query(origQ, [xss(id)]); // eslint-disable-line
     const dbResult = await client.query(q, [xss(id)]);
     await client.end();
     result.item = dbResult.rows;
