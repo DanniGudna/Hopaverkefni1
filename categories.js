@@ -26,6 +26,7 @@ async function getCategories(offset, limit) {
   const result = ({ error: '', item: '' });
   const validation = await validatePaging(off, lim);
 
+
   if (validation.length === 0) {
     try {
       await client.connect();

@@ -14,11 +14,9 @@ const csvFilePath = './data/books.csv';
 
 csv()
   .fromFile(csvFilePath)
-  .on('json', (jsonObj) => {
-    postCategory(jsonObj.category);
-    // combine csv header row and csv line to a json object
-    // jsonObj.a ==> 1 or 4
+  .on('json', async (jsonObj) => {
+    await postCategory(jsonObj.category);
   })
-  .on('done', (error) => {
-    console.info(error);
+  .on('done', () => {
+    console.info('doneeee');
   });
