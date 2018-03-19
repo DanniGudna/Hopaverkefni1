@@ -7,6 +7,7 @@ const helmet = require('helmet'); // eslint-disable-line
 const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
 const users = require('./db.js');
+const cloudinary = require('cloudinary');
 
 const api = require('./api');
 
@@ -26,6 +27,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
 }));
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_APIKEY,
+  api_secret: process.env.CLOUDINARY_APISECRET,
+});
 
 async function strat(username, password, done) {
   const user = await users.findByUsername(username);
@@ -116,6 +123,11 @@ async function validateUser(username, password) { // eslint-disable-line
     return 'Lykilorð verður að vera amk 6 stafir';
   }
 }
+
+app.post('/image', (req, res) => {
+  const { image = '' } = req.body;
+  console.info(res.locals);
+});
 
 
 async function register(req, res, next) {
