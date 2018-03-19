@@ -1,6 +1,6 @@
 const validator = require('validator'); // eslint-disable-line
 const { sanitize } = require('express-validator/filter'); // eslint-disable-line
-//const { getBookByTitle } = require('./booksDB');
+const { getBookByTitle } = require('./booksDB');
 
 
 /**
@@ -94,13 +94,13 @@ async function validateBook(
     errors.push({ field: 'Title', message: 'title must be a string' });
   } else if (!validator.isLength(category, { min: 1, max: 255 })) {
     errors.push({ field: 'Title', message: 'Title must be of length 1 to 255 characters' });
-  } /*else {
+  } else {
     const titleCheck = await getBookByTitle(title);
     console.log('TITLECHECK', titleCheck)
     if (titleCheck.length > 0) {
       errors.push({ field: 'Title', message: 'Title must be unique' });
     }
-  }*/
+  }
 
   console.log('title done');
 
