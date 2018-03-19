@@ -8,6 +8,9 @@ const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
 const users = require('./db.js');
 const cloudinary = require('cloudinary');
+const multer = require('multer');
+
+const uploads = multer({ dest: './temp' });
 
 const api = require('./api');
 
@@ -74,7 +77,7 @@ app.use(passport.session());
 
 app.use((req, res, next) => {
   if (req.isAuthenticated()) {
-    res.locals.user = req.user.name;
+    res.locals.user = req.user.username;
   }
 
   res.locals.showLogin = true;
@@ -124,9 +127,10 @@ async function validateUser(username, password) { // eslint-disable-line
   }
 }
 
-app.post('/image', (req, res) => {
-  const { image = '' } = req.body;
-  console.info(res.locals);
+app.post('/image', uploads.single('image'), (req, res) => {
+  const { file: { path } = {} } = req;
+  console.info(req.file, path);
+  res.json({ user: res.locals.user });
 });
 
 
