@@ -1,56 +1,14 @@
 require('dotenv').config(); // eslint-disable-line
 const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
-const validator = require('validator'); // eslint-disable-line
-const { sanitize } = require('express-validator/filter'); // eslint-disable-line
+const {
+  validatePaging,
+  validateCategory,
+} = require('./validation');  // eslint-disable-line
+
 
 const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
 
-/**
- * Validates offset
- *
- * @param {number} offset - offset
- *
- * @returns {array} an array of error messages if there are any
- */
-async function validateOffset(offset, limit) {
-  const errors = [];
-
-  // offset check
-  if (typeof (offset) !== 'number') {
-    errors.push({ field: 'offset', message: 'offset must be a number' });
-  }
-
-  // limit check
-  if (typeof (limit) !== 'number') {
-    errors.push({ field: 'limit', message: 'limit must be a number' });
-  }
-
-  sanitize(offset).trim();
-  sanitize(limit).trim();
-
-  return errors;
-}
-
-/**
- * Validates category
- * @param {string} category - category to create
- *
- * @returns {array} returns array of objects of error messages
- */
-async function validateCategory(category) {
-  const errors = [];
-  // category check
-  if (typeof (category) !== 'string') {
-    errors.push({ field: 'Category', message: 'category must be a string' });
-  } else if (!validator.isLength(category, { min: 1, max: 255 })) {
-    errors.push({ field: 'Category', message: 'Category must be of length 1 to 255 characters' });
-  }
-
-  sanitize(category).trim();
-
-  return errors;
-}
 
 /**
 * /categories` GET` skilar _síðu_ af flokkum
@@ -63,10 +21,11 @@ async function getCategories(offset, limit) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
   const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
+
   const q = 'SELECT category FROM categories LIMIT $1 OFFSET $2';
   const result = ({ error: '', item: '' });
-  // TODO: gera validation fall
-  const validation = await validateOffset(off, lim);
+  const validation = await validatePaging(off, lim);
+
 
   if (validation.length === 0) {
     try {
@@ -95,11 +54,9 @@ async function getCategories(offset, limit) {
 async function postCategory(category) {
   const client = new Client({ connectionString });
 
-
   const q = 'INSERT INTO categories (category) VALUES ($1)';
   const check = 'SELECT ($1) FROM categories';
   const result = ({ error: '', item: '' });
-  // TODO: gera validation fall
   const validation = await validateCategory(category);
   if (validation.length === 0) {
     try {
