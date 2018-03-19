@@ -1,7 +1,11 @@
 const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
-const validator = require('validator'); // eslint-disable-line
-const { sanitize } = require('express-validator/filter'); // eslint-disable-line
+const {
+  validateBook,
+  validateNum,
+  validateCategory,
+  validatePaging,
+} = require('./validation');  // eslint-disable-line
 
 
 const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
@@ -24,7 +28,7 @@ async function getBooks(offset, limit) {
   const q = 'SELECT * FROM books LIMIT ($1) OFFSET ($2)';
   const result = ({ error: '', item: '' });
 
-  const validation = await validateNum(lim);
+  const validation = await validatePaging(off, lim);
 
   if (validation.length === 0) {
     try {
@@ -68,7 +72,8 @@ async function postBook({
   const result = ({ error: '', item: '' });
   const index = 0;
   // TODO: gera validation fall
-  // const validation = await validateText(category, limit, offset);
+   const validation = await validateBook(title, isbn13);
+   console.log('VALIDATION', validation)
   // if (validation.length === 0) {
   try {
     await client.connect();

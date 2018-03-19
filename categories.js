@@ -4,9 +4,8 @@ const xss = require('xss'); // eslint-disable-line
 const {
   validatePaging,
   validateCategory,
-} = require('./validation');
-//const validator = require('validator'); // eslint-disable-line
-//const { sanitize } = require('express-validator/filter'); // eslint-disable-line
+} = require('./validation');  // eslint-disable-line
+
 
 const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
 
@@ -22,9 +21,11 @@ async function getCategories(offset, limit) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
   const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
+
   const q = 'SELECT category FROM categories LIMIT $1 OFFSET $2';
   const result = ({ error: '', item: '' });
   const validation = await validatePaging(off, lim);
+
   if (validation.length === 0) {
     try {
       await client.connect();
@@ -50,14 +51,11 @@ async function getCategories(offset, limit) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function postCategory(category) {
-
   const client = new Client({ connectionString });
-
 
   const q = 'INSERT INTO categories (category) VALUES ($1)';
   const check = 'SELECT ($1) FROM categories';
   const result = ({ error: '', item: '' });
-  // TODO: gera validation fall
   const validation = await validateCategory(category);
   if (validation.length === 0) {
     try {
