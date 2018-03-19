@@ -31,6 +31,11 @@ app.use(session({
   saveUninitialized: false,
 }));
 
+if (!process.env.CLOUDINARY_CLOUD || !process.env.CLOUDINARY_API_KEY ||
+   !process.env.CLOUDINARY_API_SECRET) {
+  console.warn('Missing cloudinary config, uploading images will not work');
+}
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_APIKEY,
@@ -127,10 +132,27 @@ async function validateUser(username, password) { // eslint-disable-line
   }
 }
 
-app.post('/image', uploads.single('image'), (req, res) => {
+app.post('/image', uploads.single('image'), async (req, res, next) => {
   const { file: { path } = {} } = req;
-  console.info(req.file, path);
-  res.json({ user: res.locals.user });
+  if (!path) {
+    return res.json({ message: 'gat ekki lesið mynd' });
+  }
+  if (!req.isAuthenticated()) {
+    return res.json({ message: 'thu tharft ad skra thig inn' });
+  }
+
+  let upload = null;
+
+  /* try {
+    upload = await cloudinary.v2.uploader.upload(path);
+  } catch (error) {
+    console.error('Unable to upload file to cloudinary:', path);
+    return next(error);
+  }
+
+  const { secure_url } = upload; // eslint-disable-line */
+  const r = await users.insertPic(res.locals.user, 'asdfadsf');
+  return res.json({ user: r });
 });
 
 
