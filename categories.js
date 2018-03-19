@@ -13,7 +13,7 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
  *
  * @returns {array} an array of error messages if there are any
  */
-async function validateOffset(offset) {
+async function validateOffset(offset, limit) {
   const errors = [];
 
   // offset check
@@ -21,7 +21,13 @@ async function validateOffset(offset) {
     errors.push({ field: 'offset', message: 'offset must be a number' });
   }
 
+  // limit check
+  if (typeof (limit) !== 'number') {
+    errors.push({ field: 'limit', message: 'limit must be a number' });
+  }
+
   sanitize(offset).trim();
+  sanitize(limit).trim();
 
   return errors;
 }
@@ -53,19 +59,21 @@ async function validateCategory(category) {
 * the limit, should start at 0 then increment by X
 * @returns {Promise} Promise representing an array of the books for the page
 */
-async function getCategories(offset) {
+async function getCategories(offset, limit) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
   console.log('OFF', off)
-  const q = 'SELECT category FROM categories LIMIT 15 OFFSET $1';
+  const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
+  console.log('LIM', lim)
+  const q = 'SELECT category FROM categories LIMIT $1 OFFSET $2';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
-  const validation = await validateOffset(off);
+  const validation = await validateOffset(off, lim);
   console.log(validation);
   if (validation.length === 0) {
     try {
       await client.connect();
-      const dbResult = await client.query(q, [off]);
+      const dbResult = await client.query(q, [Number(xss(lim)), Number(xss(off))]);
       await client.end();
       result.item = dbResult.rows;
       result.error = null;
