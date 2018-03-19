@@ -178,7 +178,9 @@ async function patchBookId({ id } = {}) {
   // if (validation.length === 0) {
   try {
     await client.connect();
-    const origResult = await client.query(origQ, [xss(id)]);
+
+    const origResult = await client.query(origQ, [xss(id)]); // eslint-disable-line
+
     const dbResult = await client.query(q, [xss(id)]);
     await client.end();
     result.item = dbResult.rows;

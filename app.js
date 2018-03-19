@@ -7,9 +7,13 @@ const helmet = require('helmet'); // eslint-disable-line
 const passport = require('passport'); // eslint-disable-line
 const { Strategy } = require('passport-local'); // eslint-disable-line
 const users = require('./db.js');
+const cloudinary = require('cloudinary');
+const multer = require('multer');
+
+const uploads = multer({ dest: './temp' });
 
 const api = require('./api');
-const users = require('./users');
+// const users = require('./users');
 
 const app = express();
 
@@ -27,6 +31,17 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
 }));
+
+if (!process.env.CLOUDINARY_CLOUD || !process.env.CLOUDINARY_API_KEY ||
+   !process.env.CLOUDINARY_API_SECRET) {
+  console.warn('Missing cloudinary config, uploading images will not work');
+}
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_APIKEY,
+  api_secret: process.env.CLOUDINARY_APISECRET,
+});
 
 async function strat(username, password, done) {
   const user = await users.findByUsername(username);
@@ -68,7 +83,7 @@ app.use(passport.session());
 
 app.use((req, res, next) => {
   if (req.isAuthenticated()) {
-    res.locals.user = req.user.name;
+    res.locals.user = req.user.username;
   }
 
   res.locals.showLogin = true;
@@ -117,6 +132,29 @@ async function validateUser(username, password) { // eslint-disable-line
     return 'Lykilorð verður að vera amk 6 stafir';
   }
 }
+
+app.post('/image', uploads.single('image'), async (req, res, next) => {
+  const { file: { path } = {} } = req;
+  if (!path) {
+    return res.json({ message: 'gat ekki lesið mynd' });
+  }
+  if (!req.isAuthenticated()) {
+    return res.json({ message: 'thu tharft ad skra thig inn' });
+  }
+
+  let upload = null;
+
+  try {
+    upload = await cloudinary.v2.uploader.upload(path);
+  } catch (error) {
+    console.error('Unable to upload file to cloudinary:', path);
+    return next(error);
+  }
+
+  const { secure_url } = upload; // eslint-disable-line
+  const r = await users.insertPic(res.locals.user, secure_url);
+  return res.json({ user: r });
+});
 
 
 async function register(req, res, next) {
