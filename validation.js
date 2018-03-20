@@ -123,7 +123,7 @@ async function validatePaging(offset, limit) {
  */
 async function validateBook(
   title, isbn13, author, description, category, isbn10,
-  published, pagecount, language
+  published, pagecount, language,
 ) {
   const errors = [];
 
@@ -139,19 +139,12 @@ async function validateBook(
     }
   }
 
-  console.log('title done');
-  console.log(errors);
-
   // isbn13 check
   if (typeof (isbn13) !== 'string') {
     errors.push({ field: 'isbn13', message: 'isbn13 must be a string' });
   } else if (!validator.isISBN(isbn13, [13])) {
-    console.log('CONDITION PASSED')
     errors.push({ field: 'isbn13', message: 'Must be ISBN13' });
   }
-
-  console.log('isbn13 done');
-  console.log(errors);
 
   // author check
   if (author) {
@@ -161,8 +154,6 @@ async function validateBook(
       errors.push({ field: 'Author', message: 'Author must be of length 1 to 64 characters' });
     }
   }
-  console.log('Author cehck complete');
-  console.log(errors);
 
   // description check
   if (description) {
@@ -170,8 +161,6 @@ async function validateBook(
       errors.push({ field: 'Description', message: 'Description must be string' });
     }
   }
-  console.log('description check complete');
-  console.log(errors);
 
   // category check
   // getum ekki kallad a validatecategory thvi thad verdur ljott thegar thetta er
@@ -185,16 +174,11 @@ async function validateBook(
     await client.connect();
     const check = 'SELECT category FROM categories WHERE category = ($1)';
     const duplicateCheck = await client.query(check, [xss(category)]);
-    console.log('DUPLICATECHECK.ROWS.LENGTH', duplicateCheck.rows.length)
     if (duplicateCheck.rows.length < 1) {
-      console.log('CONDITION PASSED')
       errors.push({ field: 'category', message: 'category does not exist' });
     }
     await client.end();
   }
-
-  console.log('category check complete');
-  console.log(errors);
 
   // isbn10 check
   if (isbn10) {
@@ -204,9 +188,8 @@ async function validateBook(
       errors.push({ field: 'isbn10', message: 'Must be ISBN10' });
     }
   }
-  console.log('isbn10 check complete');
-  console.log(errors);
-  //published
+
+  // published
   if (published) {
     if (typeof (published) !== 'string') {
       errors.push({ field: 'published', message: 'published must be a string' });
@@ -214,19 +197,15 @@ async function validateBook(
       errors.push({ field: 'Published', message: 'Published must be of length 0 to 32 characters' });
     }
   }
-  console.log('published rdy');
-  console.log(errors);
-  //PAGECOUNT
+
+  // PAGECOUNT
   // TODO: athuga med int
   if (pagecount) {
     if (typeof (pagecount) !== 'number') {
-      console.log('CONDITION PASSED')
       errors.push({ field: 'pagecount', message: 'pagecount must be a number' });
     }
   }
-  console.log('pagecount rfy');
-  console.log(errors);
-  //language
+  // language
   if (language) {
     if (typeof (language) !== 'string') {
       errors.push({ field: 'language', message: 'language must be a string' });
@@ -234,8 +213,6 @@ async function validateBook(
       errors.push({ field: 'language', message: 'language must be of length 2 characters' });
     }
   }
-  console.log('language rfy');
-  console.log(errors);
 
   sanitize(category).trim();
 
