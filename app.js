@@ -4,21 +4,39 @@ const express = require('express'); // eslint-disable-line
 const cookieParser = require('cookie-parser'); // eslint-disable-line
 const session = require('express-session'); // eslint-disable-line
 const helmet = require('helmet'); // eslint-disable-line
-const passport = require('passport'); // eslint-disable-line
-const { Strategy } = require('passport-local'); // eslint-disable-line
+const { Strategy, ExtractJwt } = require('passport-jwt'); // eslint-disable-line
 const users = require('./db.js');
+const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary');
 const multer = require('multer');
 
 const uploads = multer({ dest: './temp' });
+const { passport } = require('./utils.js');
+
+const {
+  JWT_SECRET: jwtSecret,
+  TOKEN_LIFETIME: tokenLifetime = 20,
+} = process.env;
+
+if (!jwtSecret) {
+  console.error('JWT_SECRET not registered in .env');
+  process.exit(1);
+}
 
 const api = require('./api');
-// const users = require('./users');
+const user = require('./users');
 
 const app = express();
 
 app.use(express.json());
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: jwtSecret,
+};
+
 app.use('/', api);
+app.use('/users', user);
 
 const sessionSecret = 'sec';
 
@@ -32,66 +50,19 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-if (!process.env.CLOUDINARY_CLOUD || !process.env.CLOUDINARY_API_KEY ||
-   !process.env.CLOUDINARY_API_SECRET) {
-  console.warn('Missing cloudinary config, uploading images will not work');
+async function strat(data, next) {
+  const u = await users.findById(data.id);
+
+  if (u) {
+    next(null, u);
+  } else {
+    next(null, false);
+  }
 }
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.CLOUDINARY_APIKEY,
-  api_secret: process.env.CLOUDINARY_APISECRET,
-});
-
-async function strat(username, password, done) {
-  const user = await users.findByUsername(username);
-  if (!user) {
-    return done(null, false);
-  }
-
-  let result = false;
-  try {
-    result = await users.comparePasswords(password, user.passwd);
-  } catch (error) {
-    done(error);
-  }
-
-  if (result) {
-    console.info(user);
-    return done(null, user);
-  }
-
-  return done(null, false);
-}
-
-passport.use(new Strategy(strat));
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await users.findById(id);
-    return done(null, user);
-  } catch (error) {
-    return done(error);
-  }
-});
+passport.use(new Strategy(jwtOptions, strat));
 
 app.use(passport.initialize());
-app.use(passport.session());
-
-app.use((req, res, next) => {
-  if (req.isAuthenticated()) {
-    res.locals.user = req.user.username;
-  }
-
-  res.locals.showLogin = true;
-
-  next();
-});
-
 
 app.get('/login', (req, res) => {
   let message = '';
@@ -102,16 +73,24 @@ app.get('/login', (req, res) => {
   res.json(message);
 });
 
-app.post(
-  '/login',
-  passport.authenticate('local', {
-    failureMessage: 'Vitlaust notendanafn eða lykilorð',
-    failureRedirect: '/login',
-  }),
-  (req, res) => {
-    res.json({ message: 'you are logged inn' });
-  },
-);
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  const u = await users.findByUsername(username);
+  if (!u) {
+    return res.status(401).json({ error: 'No such user' });
+  }
+  const passwordIsCorrect = await users.comparePasswords(password, u.passwd);
+
+  if (passwordIsCorrect) {
+    const payload = { id: u.id };
+    const tokenOptions = { expiresIn: tokenLifetime };
+    const token = jwt.sign(payload, jwtOptions.secretOrKey, tokenOptions);
+    return res.json({ token });
+  }
+
+  return res.status(401).json({ error: 'Invalid password' });
+});
 
 app.get('/logout', (req, res) => {
   req.logout();
@@ -123,9 +102,9 @@ async function validateUser(username, password) { // eslint-disable-line
     return 'Notendanafn verður að vera amk 2 stafir';
   }
 
-  const user = await users.findByUsername(username);
+  const u = await users.findByUsername(username);
 
-  if (user) {
+  if (u) {
     return 'Notendanafn er þegar skráð';
   }
 
