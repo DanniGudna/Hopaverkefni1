@@ -57,6 +57,7 @@ async function strat(username, password, done) {
   }
 
   if (result) {
+    console.info(user);
     return done(null, user);
   }
 
