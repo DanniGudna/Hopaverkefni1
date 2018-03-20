@@ -35,7 +35,7 @@ router.patch('/me', requireAuthentication, async (req, res) => { // eslint-disab
   return res.json(u);
 });
 
-router.post('/me/profile', requireAuthentication, async (req, res, next) => {
+router.post('/me/profile', requireAuthentication, uploads.single('image'), async (req, res, next) => {
   const { file: { path } = {} } = req;
   if (!path) {
     return res.json({ message: 'gat ekki lesið mynd' });
