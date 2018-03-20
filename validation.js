@@ -119,7 +119,7 @@ async function validatePaging(offset, limit) {
  * @param {string} published - date of publication -TODO:
  * @param {number} pagecount - number of pages- number min 1
  * @param {string} language - language of the book- must be 2 letters
- * @returns {array} returns array of objects of error messages
+ * @returns {Promise} returns array of objects of error messages
  */
 async function validateBook(
   title, isbn13, author, description, category, isbn10,
