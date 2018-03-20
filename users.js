@@ -57,11 +57,10 @@ router.post('/me/profile', requireAuthentication, async (req, res, next) => {
 });
 
 router.get('/me/read', requireAuthentication, (req, res) => {
+
   res.json({ message: 'hello' });
 });
 
-router.post('/me/read', requireAuthentication, (req, res) => {
-  res.json({ message: 'hello' });
 });
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
