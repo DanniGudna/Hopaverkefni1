@@ -110,8 +110,8 @@ async function validateUser(username, password) {
   }
 }
 
-async function register(req, res, next) {
-  const { username, password, name } = req.body;
+async function register({ username, name, password } = {}) {
+  /* const { username, password, name } = req.body;
 
   const validationMessage = await validateUser(username, password);
 
@@ -123,20 +123,40 @@ async function register(req, res, next) {
 
   // næsta middleware mun sjá um að skrá notanda inn því hann verður til
   // og `username` og `password` verða ennþá sett sem rétt í `req`
-  next();
+  next(); */
+   // eslint-disable-line
+  const validationMessage = await validateUser(username, password);
+  if (validationMessage) {
+    return { status: 400, data: validationMessage };
+  }
+
+  const output = await users.createUser(username, password, name);
+
+  return { status: 200, data: output };
 }
 
+
 // registers new user
-app.post(
-  '/register',
+app.post('/register', async (req, res) => {
+  /*
   register,
   passport.authenticate('local', {
     failureRedirect: '/login',
   }),
   (req, res) => {
     res.redirect('/admin');
-  },
-);
+  }, */
+  const {
+    username,
+    name,
+    password,
+  } = req.body;
+
+  const { status, data } = await register({
+    username, name, password,
+  });
+  return res.status(status).json(data);
+});
 
 
 function notFoundHandler(req, res, next) {
