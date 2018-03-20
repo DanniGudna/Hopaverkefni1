@@ -66,6 +66,7 @@ async function getBooks(offset, limit) {
 */
 async function postBook(books) {
   const client = new Client({ connectionString });
+
   const {
     title,
     isbn13,
@@ -84,22 +85,31 @@ async function postBook(books) {
   const params = '(title, isbn13, author, description, category, isbn10, published, pagecount, language) ';
   const val = 'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *';
   const query = insert + params + val;
+  const result = ({ error: '', item: '' });
 
   const values = [
     title, isbn13, author, description,
     category, isbn10, published, pagecount, language,
   ];
-
+    const validation = await validateBook(title, isbn13, author, description,category,isbn10,published,pagecount,language);
+ if (validation.length === 0) {
   try {
-    const result = await client.query(query, values);
-    const { rows } = result;
-    return rows;
+    const dataresult = await client.query(query, values);
+    result.item = dataresult;
+    result.error = null
   } catch (err) {
     console.error('Error inserting data');
     throw err;
   } finally {
     await client.end();
+  }  
+ } else {
+    result.item = null;
+    result.error = validation;
   }
+   
+   return result;
+   
 }
 
 /**
@@ -150,7 +160,7 @@ async function getBookId({ id } = {}) {
 async function patchBookId({ id } = {}) {
   const client = new Client({ connectionString });
   // fáum allar upplýsingar um bókina til að sjá hvað breytist
-  const origQ = 'SELECT * FROM books WHERE id = $1';
+  const origQ = 'SELECT * FROM books WHERE id = ($1)';
   const q = '';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall
