@@ -8,12 +8,7 @@ const { Strategy, ExtractJwt } = require('passport-jwt');
 const users = require('./db');
 const jwt = require('jsonwebtoken');
 
-<<<<<<< HEAD
 const { passport } = require('./utils.js');
-=======
-const uploads = multer({ dest: './temp' });
-const { passport } = require('./utils');
->>>>>>> be52623f85cadedd5ed63ab0f262f135ec0fcf56
 
 const {
   JWT_SECRET: jwtSecret,
@@ -115,33 +110,6 @@ async function validateUser(username, password) {
   }
 }
 
-<<<<<<< HEAD
-=======
-app.post('/image', uploads.single('image'), async (req, res, next) => {
-  const { file: { path } = {} } = req;
-  if (!path) {
-    return res.json({ message: 'gat ekki lesið mynd' });
-  }
-  if (!req.isAuthenticated()) {
-    return res.json({ message: 'thu tharft ad skra thig inn' });
-  }
-
-  let upload = null;
-
-  try {
-    upload = await cloudinary.v2.uploader.upload(path);
-  } catch (error) {
-    console.error('Unable to upload file to cloudinary:', path);
-    return next(error);
-  }
-
-  const { secureUrl } = upload;
-  const r = await users.insertPic(res.locals.user, secureUrl);
-  return res.json({ user: r });
-});
-
-
->>>>>>> be52623f85cadedd5ed63ab0f262f135ec0fcf56
 async function register(req, res, next) {
   const { username, password, name } = req.body;
 

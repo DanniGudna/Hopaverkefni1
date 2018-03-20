@@ -50,30 +50,17 @@ router.post('/me/profile', requireAuthentication, async (req, res, next) => {
     return next(error);
   }
 
-<<<<<<< HEAD
   const { secure_url } = upload; // eslint-disable-line
   const r = await users.insertPic(req.user.username, secure_url);
-=======
-  const { secureUrl } = upload;
-  const r = await users.insertPic(res.locals.user, secureUrl);
->>>>>>> be52623f85cadedd5ed63ab0f262f135ec0fcf56
+
   return res.json({ user: r });
 });
 
 router.get('/me/read', requireAuthentication, (req, res) => {
-<<<<<<< HEAD
+
   res.json({ message: 'hello' });
 });
 
-router.post('/me/read', requireAuthentication, (req, res) => {
-  res.json({ message: 'hello' });
-=======
-
-});
-
-router.post('/me/read', requireAuthentication, (req, res) => {
-
->>>>>>> be52623f85cadedd5ed63ab0f262f135ec0fcf56
 });
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
