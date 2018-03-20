@@ -68,30 +68,29 @@ async function postBook({
   title, isbn13, author, description, category, isbn10, published, pagecount, language,
 } = {}) {
   const client = new Client({ connectionString });
-  const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9)';
+  const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *';
   const result = ({ error: '', item: '' });
   const index = 0;
   // TODO: gera validation fall
-   const validation = await validateBook(title, isbn13);
-   console.log('VALIDATION', validation)
-  // if (validation.length === 0) {
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [
-      xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10),
-      published, pagecount, xss(language)]);
-    await client.end();
-    result.item = dbResult.rows[index];
-    result.error = null;
-  } catch (err) {
-    console.info(err);
+  const validation = await validateBook(title, isbn13, author, description,category,isbn10,published,pagecount,language);
+  console.log('VALIDATION', validation)
+  if (validation.length === 0) {
+    try {
+      await client.connect();
+      const dbResult = await client.query(q, [
+        xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10),
+        published, pagecount, xss(language)]);
+      await client.end();
+      result.item = dbResult.rows[index];
+      result.error = null;
+    } catch (err) {
+      console.info(err);
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
   }
 
-  /* } else {
-   result.item = null;
-   result.error = validation;
- }
-*/
   return result;
 }
 
@@ -143,7 +142,7 @@ async function getBookId({ id } = {}) {
 async function patchBookId({ id } = {}) {
   const client = new Client({ connectionString });
   // fáum allar upplýsingar um bókina til að sjá hvað breytist
-  const origQ = 'SELECT * FROM books WHERE id = $1';
+  const origQ = 'SELECT * FROM books WHERE id = ($1)';
   const q = '';
   const result = ({ error: '', item: '' });
   // TODO: gera validation fall

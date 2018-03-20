@@ -21,12 +21,12 @@ CREATE TABLE books (
     isbn13 VARCHAR(13) UNIQUE NOT NULL,
     author VARCHAR(64),
     description TEXT,
-    category INT,
+    category VARCHAR(64),
     isbn10 VARCHAR(10) UNIQUE,
-    published VARCHAR(12),
+    published VARCHAR(32),
     pagecount INT,
     language VARCHAR(2),
-    FOREIGN KEY (category) REFERENCES categories (id)
+    FOREIGN KEY (category) REFERENCES categories (category)
 );
 
 CREATE TABLE readBooks (
