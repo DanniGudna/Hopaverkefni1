@@ -61,7 +61,6 @@ router.get('/me/read', requireAuthentication, (req, res) => {
   res.json({ message: 'hello' });
 });
 
-});
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   const { status, data } = await getOneById(id);
