@@ -18,14 +18,16 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 * @param {number} books.limit - How many books should show up on the page
 * @param {number} books.offset - How many books should be skipped befor starting
 * the limit, should start at 0 then increment by X - ath veit ekki hvort að þurfi
+* @param {string} books.search - search query
 * @returns {Promise} Promise representing an object containing either array of
 * the books for the page or the error message
 */
-async function getBooks(offset, limit) {
+async function getBooks(offset, limit, search) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
   const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
-  const q = 'SELECT * FROM books LIMIT ($1) OFFSET ($2)';
+  const src = (typeof search === 'undefined') ? "" : search;
+  const q = 'SELECT * FROM books WHERE WHERE to_tsvector(body) @@ to_tsquery($3) LIMIT ($1) OFFSET ($2)';
   const result = ({ error: '', item: '' });
 
   const validation = await validatePaging(off, lim);
@@ -33,7 +35,7 @@ async function getBooks(offset, limit) {
   if (validation.length === 0) {
     try {
       await client.connect();
-      const dbResult = await client.query(q, [Number(xss(lim)), Number(xss(off))]);
+      const dbResult = await client.query(q, [Number(xss(lim)), Number(xss(off)), xss(search)]);
       await client.end();
       result.item = dbResult.rows;
       result.error = null;
@@ -44,6 +46,7 @@ async function getBooks(offset, limit) {
     result.item = null;
     result.error = validation;
   }
+  console.log("result " + result);
   return result;
 }
 
@@ -58,7 +61,7 @@ async function getBooks(offset, limit) {
 * @param {string} books.description - description of book ( not nesecary?)
 * @param {string} books.category - category of book, refrence table categories
 * @param {string} books.isbn10 - isbn10 number - unique
-* @param {string} books.published - date of publication
+* @param {number} books.published - date of publication
 * @param {number} books.pagecount - number of pages
 * @param {string} books.language - language of the book
 * @returns {Promise} Promise representing an array of the books for the page
@@ -84,31 +87,19 @@ async function postBook(books) {
   const params = '(title, isbn13, author, description, category, isbn10, published, pagecount, language) ';
   const val = 'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *';
   const query = insert + params + val;
-  const result = ({ error: '', item: [[]] });
+  const result = ({ error: '', item:  });
 
   const values = [
     title, isbn13, author, description,
     category, isbn10, published, pagecount, language,
   ];
-
-
   const validation = await validateBook(
-    title,
-    isbn13,
-    author,
-    description,
-    category,
-    isbn10,
-    published,
-    pagecount,
-    language,
-  );
-
+    title, isbn13, author, description,category,isbn10,published,pagecount,language);
   if (validation.length === 0) {
     try {
       const dataresult = await client.query(query, values);
       result.item = dataresult.rows;
-      result.error = null;
+      result.error = null
     } catch (err) {
       console.error('Error inserting data');
       throw err;
@@ -121,6 +112,7 @@ async function postBook(books) {
   }
 
   return result;
+
 }
 
 /**
