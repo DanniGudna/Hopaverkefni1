@@ -26,8 +26,18 @@ async function getBooks(offset, limit, search) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
   const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
-  const src = (typeof search === 'undefined') ? "" : search;
-  const q = 'SELECT * FROM books WHERE WHERE to_tsvector(body) @@ to_tsquery($3) LIMIT ($1) OFFSET ($2)';
+  //const src = (typeof search === 'undefined') ? '' : search;
+  const beginQ = 'SELECT * FROM books';
+  const optionalQ = ' WHERE to_tsvector(title) @@ to_tsquery($3) OR to_tsvector(description) @@ to_tsquery($3)';
+  const endQ = ' LIMIT ($1) OFFSET ($2)';
+  let q;
+  //const q = 'SELECT * FROM books WHERE to_tsvector(title) @@ to_tsquery($3) OR to_tsvector(description) @@ to_tsquery($3) LIMIT ($1) OFFSET ($2)';
+  if (search) {
+    q = beginQ + optionalQ + endQ;
+  } else {
+    q = beginQ + endQ;
+  }
+  console.log(q);
   const result = ({ error: '', item: '' });
 
   const validation = await validatePaging(off, lim);
@@ -35,7 +45,12 @@ async function getBooks(offset, limit, search) {
   if (validation.length === 0) {
     try {
       await client.connect();
-      const dbResult = await client.query(q, [Number(xss(lim)), Number(xss(off)), xss(search)]);
+      let dbResult;
+      if (search) {
+        dbResult = await client.query(q, [Number(xss(lim)), Number(xss(off)), xss(search)]);
+      } else {
+        dbResult = await client.query(q, [Number(xss(lim)), Number(xss(off))]);
+      }
       await client.end();
       result.item = dbResult.rows;
       result.error = null;
@@ -87,14 +102,14 @@ async function postBook(books) {
   const params = '(title, isbn13, author, description, category, isbn10, published, pagecount, language) ';
   const val = 'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *';
   const query = insert + params + val;
-  const result = ({ error: '', item:  });
+  const result = ({ error: '', item: [[]] });
 
   const values = [
     title, isbn13, author, description,
     category, isbn10, published, pagecount, language,
   ];
   const validation = await validateBook(
-    title, isbn13, author, description,category,isbn10,published,pagecount,language);
+    title, isbn13, author, description, category, isbn10, published, pagecount, language);
   if (validation.length === 0) {
     try {
       const dataresult = await client.query(query, values);
