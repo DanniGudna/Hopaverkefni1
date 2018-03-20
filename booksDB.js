@@ -44,7 +44,6 @@ async function getBooks(offset, limit) {
     result.item = null;
     result.error = validation;
   }
-  console.log("result " + result);
   return result;
 }
 
@@ -109,9 +108,7 @@ async function postBook(books) {
     try {
       const dataresult = await client.query(query, values);
       result.item = dataresult.rows;
-
       result.error = null;
-
     } catch (err) {
       console.error('Error inserting data');
       throw err;
@@ -124,7 +121,6 @@ async function postBook(books) {
   }
 
   return result;
-
 }
 
 /**
