@@ -64,35 +64,42 @@ async function getBooks(offset, limit) {
 * @param {string} books.language - language of the book
 * @returns {Promise} Promise representing an array of the books for the page
 */
-async function postBook({
-  title, isbn13, author, description, category, isbn10, published, pagecount, language,
-} = {}) {
+async function postBook(books) {
   const client = new Client({ connectionString });
-  const q = 'INSERT INTO books (title, isbn13, author,description, category, isbn10,published,pagecount, language) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9)';
-  const result = ({ error: '', item: '' });
-  const index = 0;
-  // TODO: gera validation fall
-   const validation = await validateBook(title, isbn13);
-   console.log('VALIDATION', validation)
-  // if (validation.length === 0) {
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [
-      xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10),
-      published, pagecount, xss(language)]);
-    await client.end();
-    result.item = dbResult.rows[index];
-    result.error = null;
-  } catch (err) {
-    console.info(err);
-  }
+  const {
+    title,
+    isbn13,
+    author,
+    description,
+    category,
+    isbn10,
+    published,
+    pagecount,
+    language,
+  } = books;
 
-  /* } else {
-   result.item = null;
-   result.error = validation;
- }
-*/
-  return result;
+  await client.connect();
+
+  const insert = 'INSERT INTO books';
+  const params = '(title, isbn13, author, description, category, isbn10, published, pagecount, language) ';
+  const val = 'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *';
+  const query = insert + params + val;
+
+  const values = [
+    title, isbn13, author, description,
+    category, isbn10, published, pagecount, language,
+  ];
+
+  try {
+    const result = await client.query(query, values);
+    const { rows } = result;
+    return rows;
+  } catch (err) {
+    console.error('Error inserting data');
+    throw err;
+  } finally {
+    await client.end();
+  }
 }
 
 /**
@@ -130,33 +137,6 @@ async function getBookId({ id } = {}) {
 }
 
 
-/**
-* Get a single book
-*`/books/:id`
-*  - `GET` skilar stakri bók
-*
-* @param {Object} books - Object
-* @param {number} books.id - How many books should show up on the page
-* @returns {Promise} Promise representing an array of the books for the page
-*/
-async function getBookByTitle({ id } = {}) {
-  const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books WHERE id = (%1)';
-  const result = ({ error: '', item: '' });
-  // TODO: no need for a validation
-
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [xss(id)]);
-    await client.end();
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
-  }
-
-  return result;
-}
 /**
 * Get a single book
 *`/books/:id`
@@ -202,6 +182,5 @@ module.exports = {
   getBooks,
   postBook,
   getBookId,
-  getBookByTitle,
   patchBookId,
 };

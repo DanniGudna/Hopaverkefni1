@@ -1,6 +1,34 @@
 const validator = require('validator'); // eslint-disable-line
 const { sanitize } = require('express-validator/filter'); // eslint-disable-line
-const { getBookByTitle } = require('./booksDB');
+const { Client } = require('pg'); // eslint-disable-line
+const xss = require('xss'); // eslint-disable-line
+
+const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
+
+/**
+* Get a single book by title
+*
+* @param {string} title - title of the book
+* @returns {Promise} Promise representing an array of the books for the page
+*/
+async function getBookByTitle(title) {
+  const client = new Client({ connectionString });
+  const q = 'SELECT * FROM books WHERE title = (%1)';
+  const result = ({ error: '', item: '' });
+  // no need for a validation it is validatad elsewhere
+
+  try {
+    await client.connect();
+    const dbResult = await client.query(q, [xss(title)]);
+    await client.end();
+    result.item = dbResult.rows;
+    result.error = null;
+  } catch (err) {
+    console.info(err);
+  }
+
+  return result.item;
+}
 
 
 /**
@@ -88,11 +116,12 @@ async function validateBook(
   published, pagecount, language
 ) {
   const errors = [];
+  console.log(typeof(title));
 
   // title  check
   if (typeof (title) !== 'string') {
     errors.push({ field: 'Title', message: 'title must be a string' });
-  } else if (!validator.isLength(category, { min: 1, max: 255 })) {
+  } else if (!validator.isLength(title, { min: 1, max: 255 })) {
     errors.push({ field: 'Title', message: 'Title must be of length 1 to 255 characters' });
   } else {
     const titleCheck = await getBookByTitle(title);
@@ -103,6 +132,7 @@ async function validateBook(
   }
 
   console.log('title done');
+  console.log(typeof(isbn13));
 
   //isbn13 check
   console.log('VALIDATOR.ISISBN(ISBN13, [13])', validator.isISBN(isbn13, [13]))
