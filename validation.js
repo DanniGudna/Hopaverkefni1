@@ -22,7 +22,7 @@ async function getBookByTitle(title) {
     await client.connect();
     const dbResult = await client.query(q, [xss(title)]);
     await client.end();
-    result.item = dbResult.rows;
+    result.item = dbResult.rowCount;
     result.error = null;
   } catch (err) {
     console.info(err);
@@ -47,6 +47,7 @@ async function validateNum(num) {
     errors.push({ field: 'id', message: 'id must be a number' });
   }
 
+  //TODO: bryeta þetta í validate id til að athuga hvort að id sé til!!
   sanitize(num).trim();
 
   return errors;
@@ -219,9 +220,139 @@ async function validateBook(
   return errors;
 }
 
+
+/**
+ * Validates patch on book, nothing is required
+ * @param {Object} books - Note to create
+ * @param {string} books.title - Title of the book- must be unique and between 1-255
+ * @param {string} books.isbn13 - isbn13 number of book- unique
+ * @param {string} books.author - author of book - not nesecary
+ * @param {string} books.description - description of book- not nesecary no length limitish
+ * @param {string} books.category - category of book, refrence table categories must be a category
+ * @param {string} books.isbn10 - isbn10 number - unique
+ * @param {string} books.published - date of publication -TODO:
+ * @param {number} books.pagecount - number of pages- number min 1
+ * @param {string} books.language - language of the book- must be 2 letters
+ * @returns {Promise} returns array of objects of error messages
+ */
+async function validatePatch({ books } = {}) {
+  const errors = [];
+  const {
+    title,
+    isbn13,
+    author,
+    description,
+    category,
+    isbn10,
+    published,
+    pagecount,
+    language,
+  } = books;
+
+  // title check
+  if (title) {
+    if (typeof (title) !== 'string') {
+
+      errors.push({ field: 'Title', message: 'title must be a string' });
+    } else if (!validator.isLength(title, { min: 1, max: 255 })) {
+      errors.push({ field: 'Title', message: 'Title must be of length 1 to 255 characters' });
+    } else {
+      const titleCheck = await getBookByTitle(title);
+      if (titleCheck.length > 0) {
+        errors.push({ field: 'Title', message: 'Title must be unique' });
+      }
+    }
+  }
+
+  // isbn13 check
+  if (isbn13) {
+    if (typeof (isbn13) !== 'string') {
+      errors.push({ field: 'isbn13', message: 'isbn13 must be a string' });
+    } else if (!validator.isISBN(isbn13, [13])) {
+      errors.push({ field: 'isbn13', message: 'Must be ISBN13' });
+    }
+  }
+
+  // author check
+  if (author) {
+    if (typeof (author) !== 'string') {
+      errors.push({ field: 'Author', message: 'author must be string' });
+    } else if (!validator.isLength(author, { min: 1, max: 64 })) {
+      errors.push({ field: 'Author', message: 'Author must be of length 1 to 64 characters' });
+    }
+  }
+
+  // description check
+  if (description) {
+    if (typeof (description) !== 'string') {
+      errors.push({ field: 'Description', message: 'Description must be string' });
+    }
+  }
+
+  // category check
+  // getum ekki kallad a validatecategory thvi thad verdur ljott thegar thetta er
+  // svo skrifad ut athuga betur seinna
+  if (category) {
+    if (typeof (category) !== 'string') {
+      errors.push({ field: 'Category', message: 'category must be a string' });
+    } else if (!validator.isLength(category, { min: 1, max: 255 })) {
+      errors.push({ field: 'Category', message: 'Category must be of length 1 to 255 characters' });
+    } else {
+      const client = new Client({ connectionString });
+      await client.connect();
+      const check = 'SELECT category FROM categories WHERE category = ($1)';
+      const duplicateCheck = await client.query(check, [xss(category)]);
+      if (duplicateCheck.rows.length < 1) {
+        errors.push({ field: 'category', message: 'category does not exist' });
+      }
+      await client.end();
+    }
+  }
+
+  // isbn10 check
+  if (isbn10) {
+    if (typeof (isbn10) !== 'string') {
+      errors.push({ field: 'isbn10', message: 'isbn10 must be a string' });
+    } else if (!validator.isISBN(isbn10, [10])) {
+      errors.push({ field: 'isbn10', message: 'Must be ISBN10' });
+    }
+  }
+
+  // published
+  if (published) {
+    if (typeof (published) !== 'string') {
+      errors.push({ field: 'published', message: 'published must be a string' });
+    } else if (!validator.isLength(published, { min: 0, max: 32 })) {
+      errors.push({ field: 'Published', message: 'Published must be of length 0 to 32 characters' });
+    }
+  }
+
+  // PAGECOUNT
+  // TODO: athuga med int
+  if (pagecount) {
+    if (typeof (pagecount) !== 'number') {
+      errors.push({ field: 'pagecount', message: 'pagecount must be a number' });
+    }
+  }
+  // language
+
+  if (language) {
+    if (typeof (language) !== 'string') {
+      errors.push({ field: 'language', message: 'language must be a string' });
+    } else if (!validator.isLength(language, { min: 2, max: 2 })) {
+      errors.push({ field: 'language', message: 'language must be of length 2 characters' });
+    }
+  }
+
+  //sanitize(category).trim();
+
+  return errors;
+}
+
 module.exports = {
   validateNum,
   validatePaging,
   validateCategory,
   validateBook,
+  validatePatch,
 };

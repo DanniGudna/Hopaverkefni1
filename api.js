@@ -74,6 +74,39 @@ async function booksID(req, res) {
   return res.status(404).json(get.error);
 }
 
+async function booksPatch(req, res) {
+  const {
+    title,
+    isbn13,
+    author,
+    description,
+    category,
+    isbn10,
+    published,
+    pagecount,
+    language,
+  } = req.body;
+  const { id } = req.params;
+  const data = await patchBookId(
+    Number(id),
+    {
+      title,
+      isbn13,
+      author,
+      description,
+      category,
+      isbn10,
+      published,
+      pagecount,
+      language,
+    }
+  );
+  if (data.error === null) {
+    return res.json(data.item);
+  }
+  return res.json(data.error);
+}
+
 function catchErrors(fn) {
   return (req, res, next) => fn(req, res, next).catch(next);
 }
@@ -86,4 +119,5 @@ router.post('/categories/', catchErrors(categoryPost));
 router.post('/books/', catchErrors(booksPost));
 router.get('/books', catchErrors(booksGet));
 router.get('/books/:id', catchErrors(booksID));
+router.patch('/books/:id', catchErrors(booksPatch));
 module.exports = router;
