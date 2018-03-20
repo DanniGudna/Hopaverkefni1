@@ -26,19 +26,22 @@ async function getBooks(offset, limit, search) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
   const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
-  //const src = (typeof search === 'undefined') ? '' : search;
+  // const src = (typeof search === 'undefined') ? '' : search;
   const beginQ = 'SELECT * FROM books';
   const optionalQ = ' WHERE to_tsvector(title) @@ to_tsquery($3) OR to_tsvector(description) @@ to_tsquery($3)';
   const endQ = ' LIMIT ($1) OFFSET ($2)';
   let q;
-  //const q = 'SELECT * FROM books WHERE to_tsvector(title) @@ to_tsquery($3) OR to_tsvector(description) @@ to_tsquery($3) LIMIT ($1) OFFSET ($2)';
+  // const q = 'SELECT * FROM books WHERE to_tsvector(title) @@ to_tsquery($3)
+  // OR to_tsvector(description) @@ to_tsquery($3) LIMIT ($1) OFFSET ($2)';
   if (search) {
     q = beginQ + optionalQ + endQ;
   } else {
     q = beginQ + endQ;
   }
   console.log(q);
-  const result = ({ error: '', item: '' });
+  const result = ({
+    error: '', item: [[]], offset: off, limit: lim,
+  });
 
   const validation = await validatePaging(off, lim);
 
