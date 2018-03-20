@@ -21,10 +21,15 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 * @returns {Promise} Promise representing an object containing either array of
 * the books for the page or the error message
 */
-async function getBooks(offset, limit) {
+async function getBooks(books) {
+  const {
+    offset,
+    limit,
+  } = books;
+
   const client = new Client({ connectionString });
-  const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
-  const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
+  const off = (typeof offset === 'undefined') ? 0 : Math.floor(offset);
+  const lim = (typeof limit === 'undefined') ? 10 : Math.floor(limit);
   const q = 'SELECT * FROM books LIMIT ($1) OFFSET ($2)';
   const result = ({ error: '', item: '' });
 
@@ -132,7 +137,8 @@ async function postBook(books) {
 * @param {number} books.id - How many books should show up on the page
 * @returns {Promise} Promise representing an array of the books for the page
 */
-async function getBookId({ id } = {}) {
+async function getBookId(books) {
+  const { id } = books;
   const client = new Client({ connectionString });
   const q = 'SELECT * FROM books WHERE id = (%1)';
   const result = ({ error: '', item: '' });

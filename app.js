@@ -12,7 +12,7 @@ const { passport } = require('./utils.js');
 
 const {
   JWT_SECRET: jwtSecret,
-  TOKEN_LIFETIME: tokenLifetime = 2000,
+  TOKEN_LIFETIME: tokenLifetime = 20000,
 } = process.env;
 
 if (!jwtSecret) {
