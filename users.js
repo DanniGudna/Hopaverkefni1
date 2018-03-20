@@ -39,17 +39,17 @@ router.post('/me/profile', requireAuthentication, async (req, res, next) => {
     return next(error);
   }
 
-  const { secure_url } = upload; // eslint-disable-line
-  const r = await users.insertPic(res.locals.user, secure_url);
+  const { secureUrl } = upload;
+  const r = await users.insertPic(res.locals.user, secureUrl);
   return res.json({ user: r });
 });
 
 router.get('/me/read', requireAuthentication, (req, res) => {
-  
+
 });
 
 router.post('/me/read', requireAuthentication, (req, res) => {
-  
+
 });
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
