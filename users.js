@@ -52,6 +52,7 @@ router.post('/me/profile', requireAuthentication, async (req, res, next) => {
 
   const { secure_url } = upload; // eslint-disable-line
   const r = await users.insertPic(req.user.username, secure_url);
+
   return res.json({ user: r });
 });
 
