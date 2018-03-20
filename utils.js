@@ -1,4 +1,4 @@
-const passport = require('passport'); // eslint-disable-line
+const passport = require('passport');
 const cloudinary = require('cloudinary');
 
 cloudinary.config({

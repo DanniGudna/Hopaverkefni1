@@ -18,7 +18,13 @@ const xss = require('xss');
  *
  * @returns {Promise} Promise representing a array of errors objects, empty if no errors
  */
-async function validateRegister({ username, name, password, photo } = {}) { // eslint-disable-line
+async function validateRegister(user) {
+  const {
+    username,
+    name,
+    password,
+    photo,
+  } = user;
   const errors = [];
 
   if (!validator.isLength(username, { min: 3, max: 256 })) {
@@ -101,8 +107,19 @@ async function getOneById(id) {
  *
  * @returns {Promise} Promise representing the object of the user to create
  */
-async function register({ username, name, password, photo } = {}) { // eslint-disable-line
-    const errors = await validateRegister({ username, name, password, photo }); //eslint-disable-line
+async function register(user) {
+  const {
+    username,
+    name,
+    password,
+    photo,
+  } = user;
+  const errors = await validateRegister({
+    username,
+    name,
+    password,
+    photo,
+  });
 
   if (errors.length > 0) {
     return { status: 400, data: errors };
