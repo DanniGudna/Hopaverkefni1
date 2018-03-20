@@ -1,17 +1,17 @@
-require('dotenv').config(); // eslint-disable-line
+require('dotenv').config();
 
-const express = require('express'); // eslint-disable-line
-const cookieParser = require('cookie-parser'); // eslint-disable-line
-const session = require('express-session'); // eslint-disable-line
-const helmet = require('helmet'); // eslint-disable-line
-const { Strategy, ExtractJwt } = require('passport-jwt'); // eslint-disable-line
-const users = require('./db.js');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const helmet = require('helmet');
+const { Strategy, ExtractJwt } = require('passport-jwt');
+const users = require('./db');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary');
 const multer = require('multer');
 
 const uploads = multer({ dest: './temp' });
-const { passport } = require('./utils.js');
+const { passport } = require('./utils');
 
 const {
   JWT_SECRET: jwtSecret,
@@ -97,7 +97,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-async function validateUser(username, password) { // eslint-disable-line
+async function validateUser(username, password) {
   if (typeof username !== 'string' || username.length < 2) {
     return 'Notendanafn verður að vera amk 2 stafir';
   }
@@ -131,8 +131,8 @@ app.post('/image', uploads.single('image'), async (req, res, next) => {
     return next(error);
   }
 
-  const { secure_url } = upload; // eslint-disable-line
-  const r = await users.insertPic(res.locals.user, secure_url);
+  const { secureUrl } = upload;
+  const r = await users.insertPic(res.locals.user, secureUrl);
   return res.json({ user: r });
 });
 
@@ -146,7 +146,7 @@ async function register(req, res, next) {
     res.json({ message: validationMessage });
   }
 
-  const result = await users.createUser(username, password, name); // eslint-disable-line
+  const result = await users.createUser(username, password, name);
 
   // næsta middleware mun sjá um að skrá notanda inn því hann verður til
   // og `username` og `password` verða ennþá sett sem rétt í `req`
@@ -166,11 +166,11 @@ app.post(
 );
 
 
-function notFoundHandler(req, res, next) { // eslint-disable-line
+function notFoundHandler(req, res, next) {
   res.status(404).json({ title: '404 villa' });
 }
 
-function errorHandler(err, req, res, next) { // eslint-disable-line
+function errorHandler(err, req, res, next) {
   console.error(err);
   res.status(500).json({ err });
 }
