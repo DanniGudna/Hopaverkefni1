@@ -59,7 +59,7 @@ async function getBooks(offset, limit) {
 * @param {string} books.description - description of book ( not nesecary?)
 * @param {string} books.category - category of book, refrence table categories
 * @param {string} books.isbn10 - isbn10 number - unique
-* @param {number} books.published - date of publication
+* @param {string} books.published - date of publication
 * @param {number} books.pagecount - number of pages
 * @param {string} books.language - language of the book
 * @returns {Promise} Promise representing an array of the books for the page
@@ -85,31 +85,41 @@ async function postBook(books) {
   const params = '(title, isbn13, author, description, category, isbn10, published, pagecount, language) ';
   const val = 'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *';
   const query = insert + params + val;
-  const result = ({ error: '', item: '' });
+  const result = ({ error: '', item: [[]] });
 
   const values = [
     title, isbn13, author, description,
     category, isbn10, published, pagecount, language,
   ];
-    const validation = await validateBook(title, isbn13, author, description,category,isbn10,published,pagecount,language);
- if (validation.length === 0) {
-  try {
-    const dataresult = await client.query(query, values);
-    result.item = dataresult;
-    result.error = null
-  } catch (err) {
-    console.error('Error inserting data');
-    throw err;
-  } finally {
-    await client.end();
-  }  
- } else {
+
+  const validation = await validateBook(
+    title,
+    isbn13,
+    author,
+    description,
+    category,
+    isbn10,
+    published,
+    pagecount,
+    language,
+  );
+  if (validation.length === 0) {
+    try {
+      const dataresult = await client.query(query, values);
+      result.item = dataresult.rows;
+      result.error = null;
+    } catch (err) {
+      console.error('Error inserting data');
+      throw err;
+    } finally {
+      await client.end();
+    }
+  } else {
     result.item = null;
     result.error = validation;
   }
-   
-   return result;
-   
+
+  return result;
 }
 
 /**
