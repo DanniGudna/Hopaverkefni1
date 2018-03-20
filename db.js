@@ -113,7 +113,6 @@ async function createUser(username, password, name) {
 }
 
 async function insertPic(username, img) {
-  console.info(username, img);
   const q = 'UPDATE users SET avatar = ($1) WHERE (username) = ($2)';
 
   const result = await query(q, [img, username]);
@@ -129,4 +128,5 @@ module.exports = {
   comparePasswords,
   createUser,
   insertPic,
+  query,
 };

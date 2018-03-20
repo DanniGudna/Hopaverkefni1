@@ -7,10 +7,7 @@ const helmet = require('helmet'); // eslint-disable-line
 const { Strategy, ExtractJwt } = require('passport-jwt'); // eslint-disable-line
 const users = require('./db.js');
 const jwt = require('jsonwebtoken');
-const cloudinary = require('cloudinary');
-const multer = require('multer');
 
-const uploads = multer({ dest: './temp' });
 const { passport } = require('./utils.js');
 
 const {
@@ -112,30 +109,6 @@ async function validateUser(username, password) { // eslint-disable-line
     return 'Lykilorð verður að vera amk 6 stafir';
   }
 }
-
-app.post('/image', uploads.single('image'), async (req, res, next) => {
-  const { file: { path } = {} } = req;
-  if (!path) {
-    return res.json({ message: 'gat ekki lesið mynd' });
-  }
-  if (!req.isAuthenticated()) {
-    return res.json({ message: 'thu tharft ad skra thig inn' });
-  }
-
-  let upload = null;
-
-  try {
-    upload = await cloudinary.v2.uploader.upload(path);
-  } catch (error) {
-    console.error('Unable to upload file to cloudinary:', path);
-    return next(error);
-  }
-
-  const { secure_url } = upload; // eslint-disable-line
-  const r = await users.insertPic(res.locals.user, secure_url);
-  return res.json({ user: r });
-});
-
 
 async function register(req, res, next) {
   const { username, password, name } = req.body;
