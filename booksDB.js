@@ -61,7 +61,6 @@ async function getBooks(offset, limit, search) {
     result.item = null;
     result.error = validation;
   }
-  console.log("result " + result);
   return result;
 }
 
@@ -127,40 +126,35 @@ async function postBook(books) {
   }
 
   return result;
-
 }
 
 /**
 * Get a single book
 *`/books/:id`
 *  - `GET` skilar stakri bók
-*
-* @param {Object} books - Object
-* @param {number} books.id - How many books should show up on the page
+* @param {number} id - id of the book you want to show
 * @returns {Promise} Promise representing an array of the books for the page
 */
-async function getBookId({ id } = {}) {
+async function getBookId(id) {
   const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books WHERE id = (%1)';
+  const q = 'SELECT * FROM books WHERE id = ($1)';
   const result = ({ error: '', item: '' });
-  // TODO: gera validation fall
-  // const validation = await validateText(category, limit, offset);
-  // if (validation.length === 0) {
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [xss(id)]);
-    await client.end();
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
+  const validation = await validateNum(Number(id));
+  if (validation.length === 0) {
+    try {
+      await client.connect();
+      const dbResult = await client.query(q, [Number(xss(id))]);
+      await client.end();
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.info(err);
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
   }
 
-  /* } else {
-   result.item = null;
-   result.error = validation;
- }
-*/
   return result;
 }
 

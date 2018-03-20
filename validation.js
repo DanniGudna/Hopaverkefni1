@@ -44,7 +44,7 @@ async function validateNum(num) {
 
   // offset check
   if (typeof (num) !== 'number') {
-    errors.push({ field: 'offset', message: 'offset must be a number' });
+    errors.push({ field: 'id', message: 'id must be a number' });
   }
 
   sanitize(num).trim();

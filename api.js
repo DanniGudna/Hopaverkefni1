@@ -63,8 +63,9 @@ async function booksPost(req, res) {
 async function booksID(req, res) {
   const { id } = req.params;
   const get = await getBookId(id);
-  if (get.length !== null) {
-    return res.json(get);
+  console.log('GET', get);
+  if (get.error === null) {
+    return res.json(get.item);
   }
   return res.status(404).json(get.error);
 }
