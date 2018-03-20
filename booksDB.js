@@ -133,33 +133,6 @@ async function getBookId({ id } = {}) {
 /**
 * Get a single book
 *`/books/:id`
-*  - `GET` skilar stakri bók
-*
-* @param {Object} books - Object
-* @param {number} books.id - How many books should show up on the page
-* @returns {Promise} Promise representing an array of the books for the page
-*/
-async function getBookByTitle({ id } = {}) {
-  const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books WHERE id = (%1)';
-  const result = ({ error: '', item: '' });
-  // TODO: no need for a validation
-
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [xss(id)]);
-    await client.end();
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
-  }
-
-  return result;
-}
-/**
-* Get a single book
-*`/books/:id`
 *  - `Patch` uppfærir bók
 *TODO:
 * @param {Object} books - Object
@@ -202,6 +175,5 @@ module.exports = {
   getBooks,
   postBook,
   getBookId,
-  getBookByTitle,
   patchBookId,
 };
