@@ -1,11 +1,6 @@
 const { Client } = require('pg'); // eslint-disable-line
 const xss = require('xss'); // eslint-disable-line
-const {
-  validateBook,
-  validateNum,
-  validateCategory,
-  validatePaging,
-} = require('./validation');  // eslint-disable-line
+const validator = require('validator'); // eslint-disable-line
 
 
 const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
@@ -21,30 +16,28 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 * @returns {Promise} Promise representing an object containing either array of
 * the books for the page or the error message
 */
-async function getBooks(offset, limit) {
+async function getBooks(offset = 0) {
   const client = new Client({ connectionString });
-  const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
-  const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
-  const q = 'SELECT * FROM books LIMIT ($1) OFFSET ($2)';
+  const q = 'SELECT * FROM books LIMIT 10 OFFSET ($1)';
   const result = ({ error: '', item: '' });
-
-  const validation = await validatePaging(off, lim);
-
-  if (validation.length === 0) {
-    try {
-      await client.connect();
-      const dbResult = await client.query(q, [Number(xss(lim)), Number(xss(off))]);
-      await client.end();
-      result.item = dbResult.rows;
-      result.error = null;
-    } catch (err) {
-      console.info(err);
-    }
-  } else {
-    result.item = null;
-    result.error = validation;
+  // TODO: gera validation fall
+  // const validation = await validateText(category, limit, offset);
+  // if (validation.length === 0) {
+  try {
+    await client.connect();
+    const dbResult = await client.query(q, [offset]);
+    await client.end();
+    result.item = dbResult.rows;
+    result.error = null;
+  } catch (err) {
+    console.info(err);
   }
-  console.log("result " + result);
+
+  /* } else {
+   result.item = null;
+   result.error = validation;
+ }
+*/
   return result;
 }
 
@@ -72,8 +65,7 @@ async function postBook({
   const result = ({ error: '', item: '' });
   const index = 0;
   // TODO: gera validation fall
-   const validation = await validateBook(title, isbn13);
-   console.log('VALIDATION', validation)
+  // const validation = await validateText(category, limit, offset);
   // if (validation.length === 0) {
   try {
     await client.connect();
@@ -129,34 +121,6 @@ async function getBookId({ id } = {}) {
   return result;
 }
 
-
-/**
-* Get a single book
-*`/books/:id`
-*  - `GET` skilar stakri bók
-*
-* @param {Object} books - Object
-* @param {number} books.id - How many books should show up on the page
-* @returns {Promise} Promise representing an array of the books for the page
-*/
-async function getBookByTitle({ id } = {}) {
-  const client = new Client({ connectionString });
-  const q = 'SELECT * FROM books WHERE id = (%1)';
-  const result = ({ error: '', item: '' });
-  // TODO: no need for a validation
-
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [xss(id)]);
-    await client.end();
-    result.item = dbResult.rows;
-    result.error = null;
-  } catch (err) {
-    console.info(err);
-  }
-
-  return result;
-}
 /**
 * Get a single book
 *`/books/:id`
@@ -178,9 +142,7 @@ async function patchBookId({ id } = {}) {
   // if (validation.length === 0) {
   try {
     await client.connect();
-
-    const origResult = await client.query(origQ, [xss(id)]); // eslint-disable-line
-
+    const origResult = await client.query(origQ, [xss(id)]);
     const dbResult = await client.query(q, [xss(id)]);
     await client.end();
     result.item = dbResult.rows;
@@ -197,11 +159,31 @@ async function patchBookId({ id } = {}) {
   return result;
 }
 
-
 module.exports = {
+  // getCategories,
+  // postCategory,
   getBooks,
   postBook,
   getBookId,
-  getBookByTitle,
   patchBookId,
 };
+
+/*
+  - `GET` skilar _síðu_ af flokkum check
+  - `POST` býr til nýjan flokk og skilar check
+* `/books`
+  - `GET` skilar _síðu_ af bókum check
+  - `POST` býr til nýja bók ef hún er gild og skilar
+* `/books?search=query`
+  - `GET` skilar _síðu_ af bókum sem uppfylla leitarskilyrði, sjá að neðan
+* `/books/:id`
+  - `GET` skilar stakri bók
+  - `PATCH` uppfærir bók
+* `/users/:id/read`
+  - `GET` skilar _síðu_ af lesnum bókum notanda
+* `/users/me/read`
+  - `GET` skilar _síðu_ af lesnum bókum innskráðs notanda
+  - `POST` býr til nýjan lestur á bók og skilar
+* `/users/me/read/:id`
+  - `DELETE` eyðir lestri bókar fyrir innskráðann notanda
+*/
