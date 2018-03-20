@@ -91,25 +91,26 @@ async function postBook(books) {
     title, isbn13, author, description,
     category, isbn10, published, pagecount, language,
   ];
-    const validation = await validateBook(title, isbn13, author, description,category,isbn10,published,pagecount,language);
- if (validation.length === 0) {
-  try {
-    const dataresult = await client.query(query, values);
-    result.item = dataresult;
-    result.error = null
-  } catch (err) {
-    console.error('Error inserting data');
-    throw err;
-  } finally {
-    await client.end();
-  }  
- } else {
+  const validation = await validateBook(
+    title, isbn13, author, description,category,isbn10,published,pagecount,language);
+  if (validation.length === 0) {
+    try {
+      const dataresult = await client.query(query, values);
+      result.item = dataresult.rows;
+      result.error = null
+    } catch (err) {
+      console.error('Error inserting data');
+      throw err;
+    } finally {
+      await client.end();
+    }
+  } else {
     result.item = null;
     result.error = validation;
   }
-   
+
    return result;
-   
+
 }
 
 /**
