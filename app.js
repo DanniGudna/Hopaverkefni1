@@ -9,6 +9,7 @@ const users = require('./db');
 const jwt = require('jsonwebtoken');
 
 const { passport } = require('./utils.js');
+const validator = require('validator');
 
 const {
   JWT_SECRET: jwtSecret,
@@ -95,12 +96,10 @@ app.get('/logout', (req, res) => {
 });
 
 async function validateUser(username, password) {
-  if (username.length < 2) {
-    return 'Notendanafn verður að vera amk 2 stafirrrrrrrr';
-  }
-
   if (typeof (username) !== 'string') {
-    return 'wrong type';
+    return 'Notendanafn verður að vera strengur';
+  } else if (!validator.isLength(username, { min: 2 })) {
+    return 'Notendanafn verður að vera amk 2 stafir';
   }
 
   const u = await users.findByUsername(username);
@@ -109,8 +108,10 @@ async function validateUser(username, password) {
     return 'Notendanafn er þegar skráð';
   }
 
-  if (typeof password !== 'string' || password.length < 6) {
-    return 'Lykilorð verður að vera amk 6 stafir';
+  if (typeof (password) !== 'string') {
+    return 'Lykilorð verður að vera strengur';
+  } else if (!validator.isLength(username, { min: 6 })) {
+    return 'Lykilorð verður að vera amk 2 stafir';
   }
 }
 
