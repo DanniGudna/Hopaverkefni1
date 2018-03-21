@@ -179,6 +179,67 @@ async function getBookId(id) {
 }
 
 
+// only use with patchbookid
+/**
+ * Update a note asynchronously.
+ *
+ * @param {number} id - Id of note to update
+ * @param {string} books.title - Title of the book
+ * @param {string} books.isbn13 - isbn13 number of book- unique
+ * @param {string} books.author - author of book
+ * @param {string} books.description - description of book ( not nesecary?)
+ * @param {string} books.category - category of book, refrence table categories
+ * @param {string} books.isbn10 - isbn10 number - unique
+ * @param {number} books.published - date of publication
+ * @param {number} books.pagecount - number of pages
+ * @param {string} books.language - language of the book
+ * Assumes that validation is done
+ * @returns {Promise} Promise representing the object result of creating the note
+ */
+async function patchBook(id, book) {
+  const [
+    title,
+    isbn13,
+    author,
+    description,
+    category,
+    isbn10,
+    published,
+    pagecount,
+    language,
+  ] = book;
+  const client = new Client({ connectionString });
+  const q = 'UPDATE books SET title = ($2),isbn13 = ($3),author = ($4),description = ($5),category = ($6),isbn10 = ($7),published = ($8),pagecount = ($9),language = ($10) WHERE id = ($1)';
+  const result = ({ error: '', item: '' });
+  const index = 0;
+
+  try {
+    await client.connect();
+
+    const dbResult = await client.query(q, [Number(xss(id)),
+      xss(title),
+      xss(isbn13),
+      xss(author),
+      xss(description),
+      xss(category),
+      xss(isbn10),
+      xss(published),
+      Number(xss(pagecount)),
+      xss(language)
+    ]);
+    await client.end();
+    result.item = dbResult.rows[index];
+    // console.log('RESULT.ITEM', result.item)
+    result.error = null;
+    return result;
+  } catch (err) {
+    console.info(err);
+  }
+
+  return result.item;
+}
+
+
 /**
 * Get a single book
 *`/books/:id`
@@ -198,7 +259,6 @@ async function getBookId(id) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function patchBookId(id, books) {
-  console.log(typeof(id));
   let {
     title,
     isbn13,
@@ -214,13 +274,26 @@ async function patchBookId(id, books) {
   const result = ({ error: '', item: '' });
   const val = [];
   // staðfesta að id virki
-  const idError = validateNum(id);
-  console.log('IDERROR', idError);
+  const idError = await validateNum(id);
   if (idError.length > 0) {
     result.error = idError;
-    //TODO: knks skila result.error
+    // TODO: knks skila result.error
     return result;
   }
+  const original = await getBookId(id);
+  const orig = [
+    original.item[0].title,
+    original.item[0].isbn13,
+    original.item[0].author,
+    original.item[0].description,
+    original.item[0].category,
+    original.item[0].isbn10,
+    original.item[0].published,
+    original.item[0].pagecount,
+    original.item[0].language,
+  ];
+
+
 
   // athuga hvað er tómt og hvað Ekki
   Object.keys(books).forEach((el, i) => {
@@ -228,35 +301,33 @@ async function patchBookId(id, books) {
     console.log("i: " + i);
     console.log('BOOKS[EL]', books[el])
     if (!books[el]) {
-      let check = getOriginalValue(el, id)
-      check.then((orig) => {
-        console.log(orig);
-        val.push(orig);
-      });
+      // pusha upprunalega
+      val.push(orig[i]);
+      console.log('ORIG[I]', orig[i])
       // val.push(check);
     } else {
-      let check = books[el];
+      // ef ekki tómt pusha strax inn í values.
+      const check = books[el];
       val.push(check);
     }
-    console.log("val " + val);
     console.log("vali " + val[i]);
   });
-
 
   // validata það sem er ekki tómt
   const validation = await validatePatch({ books });
 
   if (validation.length === 0) {
     // patcha allt saman
-    patchBook(id, val);
-    result.item = getBookId(id);
+    patchBook(id, val );
+    const patched = await getBookId(id);
+    result.item = patched.item;
+    result.error = null;
   } else {
     // annars returna errors
     result.errors = validation;
 
   }
 
-  console.log(result.item);
 
 return result;
 }
@@ -264,6 +335,7 @@ return result;
 async function getOriginalValue(val, id) {
   const client = new Client({ connectionString });
   const q = 'SELECT ($1) FROM books WHERE id = ($2)';
+  console.log('Q', q)
   const result = ({ item: '' });
   console.log("val " + val);
   console.log("id " + id);
@@ -272,7 +344,7 @@ async function getOriginalValue(val, id) {
   try {
     await client.connect();
     const dbResult = await client.query(q, [val, Number(xss(id))]);
-    console.log('DBRESULT', dbResult)
+    console.log('DBRESULT', dbResult.rows[0]);
     await client.end();
     result.item = dbResult.rows;
   } catch (err) {
@@ -281,71 +353,12 @@ async function getOriginalValue(val, id) {
 
   return result.item;
 }
-// only use with patchbookid
-/**
- * Update a note asynchronously.
- *
- * @param {number} id - Id of note to update
- * @param {string} books.title - Title of the book
- * @param {string} books.isbn13 - isbn13 number of book- unique
- * @param {string} books.author - author of book
- * @param {string} books.description - description of book ( not nesecary?)
- * @param {string} books.category - category of book, refrence table categories
- * @param {string} books.isbn10 - isbn10 number - unique
- * @param {number} books.published - date of publication
- * @param {number} books.pagecount - number of pages
- * @param {string} books.language - language of the book
- * Assumes that validation is done
- * @returns {Promise} Promise representing the object result of creating the note
- */
-async function patchBook(id, book) {
-  const {
-    title,
-    isbn13,
-    author,
-    description,
-    category,
-    isbn10,
-    published,
-    pagecount,
-    language,
-  } = book;
-  console.log(book);
-  const client = new Client({ connectionString });
-  const q = 'UPDATE books SET title = ($2),isbn13 = ($3),author = ($4),description = ($5),category = ($6),isbn10 = ($7),published = ($8),pagecount = ($9),language = ($10) WHERE id = ($1)';
-  const result = ({ error: '', item: '' });
-  const index = 0;
 
-  try {
-    await client.connect();
-
-    const dbResult = await client.query(q, [Number(xss(id)),
-      xss(title),
-      xss(isbn13),
-      xss(author),
-      xss(description),
-      xss(category),
-      xss(isbn10),
-      xss(published),
-      xss(pagecount),
-      xss(language)
-    ]);
-    console.log("ping");
-    await client.end();
-    result.item = dbResult.rows[index];
-    // console.log('RESULT.ITEM', result.item)
-    result.error = null;
-    return result;
-  } catch (err) {
-    console.info(err);
-  }
-
-  return result.item;
-}
 
 module.exports = {
   getBooks,
   postBook,
   getBookId,
   patchBookId,
+  getOriginalValue,
 };
