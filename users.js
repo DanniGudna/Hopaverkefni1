@@ -6,7 +6,7 @@ const multer = require('multer');
 
 const {
   getReadUser,
-} = require('./user-db');
+} = require('./users-db');
 
 const uploads = multer({ dest: './temp' }); // eslint-disable-line
 
@@ -75,8 +75,14 @@ router.post('/me/profile', requireAuthentication, uploads.single('image'), async
   return res.json({ user: r });
 });
 
-router.get('/me/read', requireAuthentication, (req, res) => {
-  res.json({ message: 'hello' });
+router.post('/me/read', requireAuthentication, (req, res) => {
+  const {
+    bookID,
+    rating,
+    review,
+  } = req.query;
+  const d = users.addBookReadBy(req.user.id, bookID, rating, review);
+  res.json(d);
 });
 
 router.get('/:id', async (req, res) => {
