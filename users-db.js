@@ -137,6 +137,37 @@ async function getReadUser(id, offset) {
   return result;
 }
 
+/**
+* @param {number} userID - id of the user
+* @param {number} id - id of the book to delete
+* @returns {Promise} Promise representing the object of the user to create
+*/
+async function deleteMeReadId(userID, id) {
+  const client = new Client({ connectionString });
+  const query = 'DELETE FROM readBooks WHERE bookId = $1 AND userId = $2 RETURNING *';
+  await client.connect();
+  const result = ({ error: '', item: [[]] });
+  // TODO: laga validation
+  const validation = [];
+  if (validation.length < 1) {
+    try {
+      const dbResult = await client.query(query, [Number(xss(userID)), Number(xss(id))]);
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      await client.end();
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
+  }
+
+  return result;
+}
+
 
 module.exports = {
   getAllUsers,
@@ -145,4 +176,5 @@ module.exports = {
   findById,
   createUser,
   getReadUser,
+  deleteMeReadId,
 };

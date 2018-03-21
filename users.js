@@ -6,6 +6,7 @@ const multer = require('multer');
 
 const {
   getReadUser,
+  deleteMeReadId,
 } = require('./users-db');
 
 const uploads = multer({ dest: './temp' }); // eslint-disable-line
@@ -93,10 +94,6 @@ router.get('/:id', async (req, res) => {
   res.status(status).json(data);
 });
 
-router.delete('/me/read/:id', (req, res) => {
-  const { id } = req.body;
-  res.json({ message: id });
-});
 /* `/users/:id/read`
   - `GET` skilar _síðu_ af lesnum bókum notanda -ekki rdy
   */
@@ -112,6 +109,33 @@ async function userIdRead(req, res) {
   console.log("ping2")
   return res.status(404).json(get.error);
 }
+
+
+
+router.get('/me/read', requireAuthentication, async (req, res) => {
+
+  const { id } = req.user;
+  const offset = req.query;
+  const get = await getReadUser(id, offset);
+  if (get.error === null) {
+    return res.json(get.item);
+  }
+  return res.status(404).json(get.error);
+});
+
+router.delete('/me/read/:id', requireAuthentication, async (req, res) => {
+  console.log("Ping");
+  const { id } = req.user;
+  console.log('REQ.USER', req.user)
+  console.log('id', id)
+  const bookid = req.params.id;
+  console.log('bookid', bookid)
+  const get = await deleteMeReadId(id, bookid);
+  if (get.error === null) {
+    return res.json(get.item);
+  }
+  return res.status(404).json(get.error);
+});
 
 function catchErrors(fn) {
   return (req, res, next) => fn(req, res, next).catch(next);
