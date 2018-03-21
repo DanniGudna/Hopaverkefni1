@@ -7,19 +7,6 @@ const {
   validatePatch,
 } = require('./validation');  // eslint-disable-line
 
-const {
-  patchTitle,
-  patchAuthor,
-  patchIsbn13,
-  patchDescription,
-  patchCategory,
-  patchPublished,
-  patchIsbn10,
-  patchLanguage,
-  patchPagecount,
-} = require('./patchBooks');  // eslint-disable-line
-
-
 const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
 
 /**
@@ -51,7 +38,6 @@ async function getBooks(offset, limit, search) {
   } else {
     q = beginQ + endQ;
   }
-  console.log(q);
   const result = ({
     error: '', item: [[]], offset: off, limit: lim,
   });
@@ -129,12 +115,16 @@ async function postBook(books) {
     author,
     description,
     category,
-    isbn10, published, pagecount, language);
+    isbn10,
+    published,
+    pagecount,
+    language,
+  );
   if (validation.length === 0) {
     try {
       const dataresult = await client.query(query, values);
       result.item = dataresult.rows;
-      result.error = null
+      result.error = null;
     } catch (err) {
       console.error('Error inserting data');
       throw err;
@@ -261,7 +251,6 @@ async function patchBook(id, book) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function patchBookId(id, books) {
-
   const result = ({ error: '', item: '' });
   const val = [];
   // staðfesta að id virki
@@ -309,10 +298,8 @@ async function patchBookId(id, books) {
     // annars returna errors
     result.errors = validation;
   }
-return result;
+  return result;
 }
-
-
 
 module.exports = {
   getBooks,
