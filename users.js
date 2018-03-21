@@ -123,12 +123,8 @@ router.get('/me/read', requireAuthentication, async (req, res) => {
 });
 
 router.delete('/me/read/:id', requireAuthentication, async (req, res) => {
-  console.log("Ping");
   const { id } = req.user;
-  console.log('REQ.USER', req.user)
-  console.log('id', id)
   const bookid = req.params.id;
-  console.log('bookid', bookid)
   const get = await deleteMeReadId(id, bookid);
   if (get.error === null) {
     return res.json(get.item);
