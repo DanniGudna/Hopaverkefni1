@@ -96,7 +96,7 @@ app.get('/logout', (req, res) => {
 
 async function validateUser(username, password) {
   if (typeof username !== 'string' || username.length < 2) {
-    return 'Notendanafn verður að vera amk 2 stafir';
+    return 'Notendanafn verður að vera amk 2 stafirrrrrrrr';
   }
 
   const u = await users.findByUsername(username);
