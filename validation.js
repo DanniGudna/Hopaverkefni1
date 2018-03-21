@@ -69,10 +69,13 @@ async function validateCategory(category) {
     errors.push({ field: 'Category', message: 'Category must be of length 1 to 255 characters' });
   } else {
     await client.connect();
-    const check = 'SELECT ($1) FROM categories';
+    const check = 'SELECT * FROM categories WHERE category = ($1)';
     const duplicateCheck = await client.query(check, [xss(category)]);
+    console.log('DUPLICATECHECK.ROWS.LENGTH', duplicateCheck.rows.length)
+    console.log('DUPLICATECHECK.ROWS', duplicateCheck.rows)
     if (duplicateCheck.rows.length > 0) {
-      errors.push({ field: 'category', message: 'category does not exist' });
+      console.log('CONDITION PASSED')
+      errors.push({ field: 'category', message: 'category exists' });
     }
     await client.end();
   }
@@ -232,8 +235,9 @@ async function validateBook(
  * @returns {Promise} returns array of objects of error messages
  */
 async function validatePatch(books) {
+  console.log('BOOKS', books)
   const errors = [];
-  const {
+  const [
     title,
     isbn13,
     author,
@@ -243,10 +247,12 @@ async function validatePatch(books) {
     published,
     pagecount,
     language,
-  } = books;
+  ] = books;
 
   // title check
+  console.log('TITLE', title)
   if (title) {
+    console.log('CONDITION PASSED')
     if (typeof (title) !== 'string') {
       errors.push({ field: 'Title', message: 'title must be a string' });
     } else if (!validator.isLength(title, { min: 1, max: 255 })) {
@@ -331,7 +337,9 @@ async function validatePatch(books) {
   }
   // language
 
+  console.log('LANGUAGE', language)
   if (language) {
+    console.log('CONDITION PASSED')
     if (typeof (language) !== 'string') {
       errors.push({ field: 'language', message: 'language must be a string' });
     } else if (!validator.isLength(language, { min: 2, max: 2 })) {
