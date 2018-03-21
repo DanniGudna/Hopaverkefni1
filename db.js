@@ -87,13 +87,12 @@ async function addBookReadBy(userid, bookid, grade, comments) {
   const client = new Client({ connectionString });
   const q = 'INSERT INTO readBooks (userID, bookID, rating, review) VALUES ($1, $2, $3, $4) RETURNING *';
   await client.connect();
+  const value = [Number(xss(userid)), Number(xss(bookid)), Number(xss(grade)), xss(comments)];
 
   try {
-    const result = await client.query(q, [Number(xss(userid)), Number(xss(bookid)), Number(xss(grade)), xss(comments)]);
+    const result = await client.query(q, value);
     const { rows } = result;
-    console.log('ROWS', rows[0])
     return rows[0];
-
   } catch (err) {
     console.error(err);
     throw err;

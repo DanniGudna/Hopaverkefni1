@@ -54,7 +54,7 @@ async function validateRegister(user) {
 /**
  * Validation for ID
  *
- * @param {int} id
+ * @param {Number} id
  *
  * @returns {boolean} true if id is a Integer
  */

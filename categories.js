@@ -13,7 +13,8 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 /**
 * /categories` GET` skilar _síðu_ af flokkum
 *
-* @param {number} offset - How many books should be skipped befor starting
+* @param {String} offset - How many books should be skipped befor starting
+* @param {String} limit
 * the limit, should start at 0 then increment by X
 * @returns {Promise} Promise representing an array of the books for the page
 */
@@ -27,7 +28,6 @@ async function getCategories(offset, limit) {
     error: '', item: '', offset: off, limit: lim,
   });
   const validation = await validatePaging(off, lim);
-
 
   if (validation.length === 0) {
     try {
