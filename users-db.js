@@ -4,27 +4,6 @@ const xss = require('xss');
 
 const connectionString = process.env.DATABASE_URL;
 
-/*
-
-async function query(q, values = []) {
-  const client = new Client({ connectionString });
-  await client.connect();
-
-  let result;
-
-  try {
-    result = await client.query(q, values);
-  } catch (err) {
-    throw err;
-  } finally {
-    await client.end();
-  }
-
-  return result;
-}
-
-*/
-
 async function getAllUsers(offset) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);

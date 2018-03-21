@@ -94,7 +94,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-async function validateUser(username, password) {
+async function validateUser(username, password) { // eslint-disable-line
   if (typeof username !== 'string' || username.length < 2) {
     return 'Notendanafn verður að vera amk 2 stafir';
   }
@@ -137,11 +137,11 @@ app.post('/register', async (req, res) => {
 });
 
 
-function notFoundHandler(req, res, next) {
+function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).json({ title: '404 villa' });
 }
 
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, next) { // eslint-disable-line
   console.error(err);
   res.status(500).json({ err });
 }

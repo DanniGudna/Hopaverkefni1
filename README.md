@@ -60,39 +60,39 @@ Gögn eru gefin innan `data/` möppu þar sem `books.csv` inniheldur 532 færslu
 
 Eftirfarandi slóðir eiga að vera til staðar, öll gögn sem send eru inn skulu vera á `JSON` formi og gögnum skilað á `JSON` formi.
 
-* `/register`
-  - `POST` býr til notanda og skilar án lykilorðs hash
-* `/login`
-  - `POST` með notendanafni og lykilorði skilar token
-* `/users`
-  - `GET` skilar _síðu_ (sjá að neðan) af notendum
+* /register
+  - POST býr til notanda og skilar án lykilorðs hash -rdy xss eftir
+* /login
+  - POST með notendanafni og lykilorði skilar token -rdy xss eftir
+* /users
+  - GET skilar síðu (sjá að neðan) af notendum - rdy
   - Lykilorðs hash skal ekki vera sýnilegt
-* `/users/:id`
-  - `GET` skilar stökum notanda ef til
+* /users/:id
+  - GET skilar stökum notanda ef til -rdy
   - Lykilorðs hash skal ekki vera sýnilegt
-* `/users/me`
-  - `GET` skilar innskráðum notanda (þ.e.a.s. _þér_)
-  - `PATCH` uppfærir sendar upplýsingar um notanda fyrir utan notendanafn, þ.e.a.s. nafn eða lykilorð, ef þau eru gild
-* `/users/me/profile`
-  - `POST` setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
-* `/categories`
-  - `GET` skilar _síðu_ af flokkum
-  - `POST` býr til nýjan flokk og skilar
-* `/books`
-  - `GET` skilar _síðu_ af bókum
-  - `POST` býr til nýja bók ef hún er gild og skilar
-* `/books?search=query`
-  - `GET` skilar _síðu_ af bókum sem uppfylla leitarskilyrði, sjá að neðan
-* `/books/:id`
-  - `GET` skilar stakri bók
-  - `PATCH` uppfærir bók
-* `/users/:id/read`
-  - `GET` skilar _síðu_ af lesnum bókum notanda
-* `/users/me/read`
-  - `GET` skilar _síðu_ af lesnum bókum innskráðs notanda
-  - `POST` býr til nýjan lestur á bók og skilar
-* `/users/me/read/:id`
-  - `DELETE` eyðir lestri bókar fyrir innskráðann notanda
+* /users/me
+  - GET skilar innskráðum notanda (þ.e.a.s. þér) -rdy
+  - PATCH uppfærir sendar upplýsingar um notanda fyrir utan notendanafn, þ.e.a.s. nafn eða lykilorð, ef þau eru gild -rdy
+* /users/me/profile
+  - POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð - rdy
+* /categories
+  - GET skilar síðu af flokkum - rdy
+  - POST býr til nýjan flokk og skilar - rdy
+* /books
+  - GET skilar síðu af bókum - rdy
+  - POST býr til nýja bók ef hún er gild og skilar - rdy
+* /books?search=query
+  - GET skilar síðu af bókum sem uppfylla leitarskilyrði, sjá að neðan - rdy
+* /books/:id
+  - GET skilar stakri bók - rdy
+  - PATCH uppfærir bók - rdy
+* /users/:id/read
+  - GET skilar síðu af lesnum bókum notanda -ekki rdy
+* /users/me/read
+  - GET skilar síðu af lesnum bókum innskráðs notanda -ekki rdy 
+  - POST býr til nýjan lestur á bók og skilar -ekki rdy
+* /users/me/read/:id
+  - DELETE eyðir lestri bókar fyrir innskráðann notanda -ekki rdy
 
 Þegar gögn eru sótt,  búin til eða uppfærð þarf að athuga hvort allt sé gilt og einingar séu til og skila viðeigandi status kóðum/villuskilaboðum ef svo er ekki.
 
