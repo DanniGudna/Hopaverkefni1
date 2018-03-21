@@ -25,7 +25,7 @@ async function getCategories(offset, limit) {
 
   const q = 'SELECT category FROM categories LIMIT ($1) OFFSET ($2)';
   const result = ({
-    error: '', item: '', offset: off, limit: lim,
+    error: '', item: [[]], offset: off, limit: lim,
   });
   const validation = await validatePaging(off, lim);
 
@@ -58,7 +58,7 @@ async function postCategory(category) {
 
   const q = 'INSERT INTO categories (category) VALUES ($1)';
   const check = 'SELECT category FROM categories WHERE category = ($1)';
-  const result = ({ error: '', item: '' });
+  const result = ({ error: {}, item: [[]] });
   const validation = await validateCategory(category);
   if (validation.length === 0) {
     try {

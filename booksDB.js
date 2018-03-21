@@ -74,7 +74,7 @@ async function getBooks(offset, limit, search) {
 * @param {string} books.description - description of book ( not nesecary?)
 * @param {string} books.category - category of book, refrence table categories
 * @param {string} books.isbn10 - isbn10 number - unique
-* @param {number} books.published - date of publication
+* @param {string} books.published - date of publication
 * @param {number} books.pagecount - number of pages
 * @param {string} books.language - language of the book
 * @returns {Promise} Promise representing an array of the books for the page
@@ -140,13 +140,13 @@ async function postBook(books) {
 * Get a single book
 *`/books/:id`
 *  - `GET` skilar stakri bók
-* @param {number} id - id of the book you want to show
+* @param {String} id - id of the book you want to show
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function getBookId(id) {
   const client = new Client({ connectionString });
   const q = 'SELECT * FROM books WHERE id = ($1)';
-  const result = ({ error: '', item: '' });
+  const result = ({ error: '', item: [[]] });
   const validation = await validateNum(Number(id));
   if (validation.length === 0) {
     try {
