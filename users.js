@@ -32,9 +32,9 @@ router.patch('/me', requireAuthentication, async (req, res) => { // eslint-disab
     q = 'UPDATE users SET fname = ($1), passwd = ($2) WHERE (id) = ($3)';
     users.query(q, [password, name, req.user.id]);
   } else if (password) {
-    q = 'UPDATE users SET fname = ($1), passwd = ($2) WHERE (id) = ($3)';
+    q = 'UPDATE users SET passwd = ($2) WHERE (id) = ($3)';
   } else if (name) {
-    q = 'UPDATE users SET fname = ($1), passwd = ($2) WHERE (id) = ($3)';
+    q = 'UPDATE users SET fname = ($1) WHERE (id) = ($3)';
   }
   const u = await users.query(q, [password, name, req.user.id]);
   return res.json(u);
