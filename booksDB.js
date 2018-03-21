@@ -7,7 +7,7 @@ const {
   validatePatch,
 } = require('./validation');  // eslint-disable-line
 
-const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hopverkefni';
+const connectionString = process.env.DATABASE_URL;
 
 /**
 * Get a page of books.
