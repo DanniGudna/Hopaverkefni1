@@ -392,8 +392,8 @@ Núna hefur allt verið gert svo hægt sé að byrja að vinna með gögn, bæta
 # Nemendur
 
 ## Alexander Freyr Sveinsson
-### 
+### afs19
 ## Daníel Guðnason
-### 
+### dag27
 ## Daníel Ingólfsson
-### dai5@HÁ Í
+### dai5@

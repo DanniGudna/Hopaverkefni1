@@ -254,7 +254,6 @@ async function patchBookId(id, books) {
   const idError = await validateNum(id);
   if (idError.length > 0) {
     result.error = idError;
-    // TODO: knks skila result.error
     return result;
   }
   const original = await getBookId(id);
