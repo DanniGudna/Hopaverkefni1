@@ -14,7 +14,29 @@ const {
 
 const router = express.Router();
 
-router.get('/', catchErrors(categoriesGet));
+async function index(req, res) {
+  return res.json({
+    authentication: {
+      register: '/register',
+      login: '/login',
+    },
+    books: {
+      books: '/books',
+      book: '/book/{id}',
+    },
+    categories: '/categories',
+    users: {
+      users: '/users',
+      user: '/users/{id}',
+      read: '/users/{id}/read',
+    },
+    me: {
+      me: '/users/me',
+      profile: '/users/me/profile',
+      read: '/users/me/read',
+    },
+  });
+}
 
 async function categoriesGet(req, res) {
   const { offset, limit } = req.query;
@@ -42,8 +64,10 @@ async function booksGet(req, res) {
   const { offset, limit, search } = req.query;
   const allBooks = await getBooks(offset, limit, search);
   if (allBooks.error === null) {
+
     const result = ({ offset: allBooks.offset, limit: allBooks.limit, items: allBooks.item });
     return res.json(result);
+
   }
   return res.json(allBooks.error);
 }
@@ -111,6 +135,7 @@ function catchErrors(fn) {
   return (req, res, next) => fn(req, res, next).catch(next);
 }
 
+router.get('/', catchErrors(index));
 // Category routes
 router.get('/categories/', catchErrors(categoriesGet));
 router.post('/categories/', catchErrors(categoryPost));
