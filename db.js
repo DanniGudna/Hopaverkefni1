@@ -101,6 +101,16 @@ async function addBookReadBy(userid, bookid, grade, comments) {
   }
 }
 
+async function patchUser(passwd, name) {
+  const q = 'UPDATE users SET fname = COALESCE($1, fname), passwd = COALESCE($2, passwd) RETURNING *';
+  let hashedPassword = null;
+  if (passwd) {
+    hashedPassword = await bcrypt.hash(passwd, 11);
+  }
+  const result = await query(q, [xss(name), hashedPassword]);
+  return result[0];
+}
+
 module.exports = {
   runQuery,
   findById,
@@ -110,4 +120,5 @@ module.exports = {
   insertPic,
   query,
   addBookReadBy,
+  patchUser,
 };
