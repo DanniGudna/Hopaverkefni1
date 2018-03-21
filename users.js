@@ -42,7 +42,12 @@ router.get('/me', requireAuthentication, (req, res) => {
 router.patch('/me', requireAuthentication, async (req, res) => { // eslint-disable-line
   const { password, name } = req.body;
   const u = await users.patchUser(password, name);
-  return res.json(u);
+  const user = {
+    username: u.username,
+    name: u.fname,
+    avatar: u.avatar,
+  };
+  return res.json(user);
 });
 
 router.post('/me/profile', requireAuthentication, uploads.single('image'), async (req, res, next) => {
@@ -84,16 +89,12 @@ router.get('/:id', async (req, res) => {
   res.status(status).json(data);
 });
 
-/* `/users/:id/read`
-  - `GET` skilar _síðu_ af lesnum bókum notanda -ekki rdy
-  */
 async function userIdRead(req, res) {
   const { id } = req.params;
 
   const offset = req.query;
   const get = await getReadUser(id, offset);
   if (get.error === null) {
-
     return res.json(get.item);
   }
 
@@ -101,7 +102,6 @@ async function userIdRead(req, res) {
 }
 
 router.get('/me/read', requireAuthentication, async (req, res) => {
-
   const { id } = req.user;
   const offset = req.query;
   const get = await getReadUser(id, offset);

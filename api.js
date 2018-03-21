@@ -126,9 +126,7 @@ async function booksPatch(req, res) {
   if (data.error === null) {
     return res.json(data.item);
   }
-  console.log('DATA.ERROR', data.error)
   return res.json(data.error);
-
 }
 
 function catchErrors(fn) {

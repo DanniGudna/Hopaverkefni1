@@ -2,6 +2,10 @@ const { Client } = require('pg');
 const bcrypt = require('bcrypt');
 const xss = require('xss');
 
+const {
+  validateAddBookReadBy
+} = require('./validation');
+
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost/postgres';
 
 async function runQuery(q) {
@@ -87,17 +91,22 @@ async function addBookReadBy(userid, bookid, grade, comments) {
   const client = new Client({ connectionString });
   const q = 'INSERT INTO readBooks (userID, bookID, rating, review) VALUES ($1, $2, $3, $4) RETURNING *';
   await client.connect();
+  const validation = validateAddBookReadBy(bookid, grade, comments);
   const value = [Number(xss(userid)), Number(xss(bookid)), Number(xss(grade)), xss(comments)];
-
-  try {
-    const result = await client.query(q, value);
-    const { rows } = result;
-    return rows[0];
-  } catch (err) {
-    console.error(err);
-    throw err;
-  } finally {
-    await client.end();
+  if (validation.length > 0) {
+    console.log('CONDITION PASSED')
+    try {
+      const result = await client.query(q, value);
+      const { rows } = result;
+      return rows[0];
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      await client.end();
+    }
+  } else {
+    return validation;
   }
 }
 
