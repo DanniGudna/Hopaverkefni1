@@ -114,7 +114,7 @@ async function validateUser(username, password) {
   }
 }
 
-async function register({ username, name, password } = {}) {
+async function register(username, name, password) {
   const validationMessage = await validateUser(username, password);
   if (validationMessage) {
     return { status: 400, data: validationMessage };
@@ -139,9 +139,7 @@ app.post('/register', async (req, res) => {
     name,
     password,
   } = req.body;
-  const { status, data } = await register({
-    username, name, password,
-  });
+  const { status, data } = await register(username, name, password);
 
   return res.status(status).json(data);
 });
