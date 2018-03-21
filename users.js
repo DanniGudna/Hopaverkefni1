@@ -6,7 +6,7 @@ const multer = require('multer');
 
 const {
   getReadUser,
-} = require('./user-db');
+} = require('./users-db');
 
 const uploads = multer({ dest: './temp' }); // eslint-disable-line
 
@@ -14,7 +14,6 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
 router.get('/', async (req, res) => {
-
   const { offset } = req.query;
   const data = await getAll(offset);
   const ubers = [];
