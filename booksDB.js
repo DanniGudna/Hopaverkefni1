@@ -225,7 +225,7 @@ async function patchBook(id, book) {
       xss(isbn10),
       xss(published),
       Number(xss(pagecount)),
-      xss(language)
+      xss(language),
     ]);
     await client.end();
     result.item = dbResult.rows[index];
@@ -241,9 +241,10 @@ async function patchBook(id, book) {
 
 
 /**
-* Get a single book
+* Patch á id
 *`/books/:id`
 *  - `Patch` uppfærir bók
+* uppfærir 1 - n hluti þar sem n er fjöldi hluta sem hægt er að breyta (9)
 *TODO:
 * @param {Object} books - Object
 * @param {number} id - Title of the book
@@ -259,17 +260,6 @@ async function patchBook(id, book) {
 * @returns {Promise} Promise representing an array of the books for the page
 */
 async function patchBookId(id, books) {
-  let {
-    title,
-    isbn13,
-    author,
-    description,
-    category,
-    isbn10,
-    published,
-    pagecount,
-    language,
-  } = books;
 
   const result = ({ error: '', item: '' });
   const val = [];
@@ -293,24 +283,16 @@ async function patchBookId(id, books) {
     original.item[0].language,
   ];
 
-
-
   // athuga hvað er tómt og hvað Ekki
   Object.keys(books).forEach((el, i) => {
-    console.log("el: " + el);
-    console.log("i: " + i);
-    console.log('BOOKS[EL]', books[el])
     if (!books[el]) {
       // pusha upprunalega
       val.push(orig[i]);
-      console.log('ORIG[I]', orig[i])
-      // val.push(check);
     } else {
       // ef ekki tómt pusha strax inn í values.
       const check = books[el];
       val.push(check);
     }
-    console.log("vali " + val[i]);
   });
 
   // validata það sem er ekki tómt
@@ -318,41 +300,17 @@ async function patchBookId(id, books) {
 
   if (validation.length === 0) {
     // patcha allt saman
-    patchBook(id, val );
+    await patchBook(id, val);
     const patched = await getBookId(id);
     result.item = patched.item;
     result.error = null;
   } else {
     // annars returna errors
     result.errors = validation;
-
   }
-
-
 return result;
 }
-// only use with patchbookid
-async function getOriginalValue(val, id) {
-  const client = new Client({ connectionString });
-  const q = 'SELECT ($1) FROM books WHERE id = ($2)';
-  console.log('Q', q)
-  const result = ({ item: '' });
-  console.log("val " + val);
-  console.log("id " + id);
-  //no need to validate both has been done beforehand
 
-  try {
-    await client.connect();
-    const dbResult = await client.query(q, [val, Number(xss(id))]);
-    console.log('DBRESULT', dbResult.rows[0]);
-    await client.end();
-    result.item = dbResult.rows;
-  } catch (err) {
-    console.info(err);
-  }
-
-  return result.item;
-}
 
 
 module.exports = {
@@ -360,5 +318,4 @@ module.exports = {
   postBook,
   getBookId,
   patchBookId,
-  getOriginalValue,
 };

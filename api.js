@@ -99,15 +99,11 @@ async function booksPatch(req, res) {
       isbn10,
       published,
       pagecount,
-      language, }
-    );
+      language,
+    }
+  );
 
-    console.log('error', data.error);
-    console.log('DATA.ERROR === NULL', data.error === null)
   if (data.error === null) {
-    console.log('CONDITION PASSED')
-    console.log("end");
-    console.log('DATA.ITEM', data);
     return res.json(data.item);
 
   }

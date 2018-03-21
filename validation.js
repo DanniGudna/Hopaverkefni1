@@ -47,7 +47,7 @@ async function validateNum(num) {
     errors.push({ field: 'id', message: 'id must be a number' });
   }
 
-  //TODO: bryeta þetta í validate id til að athuga hvort að id sé til!!
+  // TODO: bryeta þetta í validate id til að athuga hvort að id sé til!!
   sanitize(num).trim();
 
   return errors;
@@ -252,7 +252,6 @@ async function validatePatch({ books } = {}) {
   // title check
   if (title) {
     if (typeof (title) !== 'string') {
-
       errors.push({ field: 'Title', message: 'title must be a string' });
     } else if (!validator.isLength(title, { min: 1, max: 255 })) {
       errors.push({ field: 'Title', message: 'Title must be of length 1 to 255 characters' });
@@ -343,8 +342,6 @@ async function validatePatch({ books } = {}) {
       errors.push({ field: 'language', message: 'language must be of length 2 characters' });
     }
   }
-
-  //sanitize(category).trim();
 
   return errors;
 }
