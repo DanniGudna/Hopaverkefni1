@@ -134,7 +134,7 @@ async function booksPatch(req, res) {
   return res.json(data.error);
 }
 
-function catchnErrors(fn) {
+function catchErrors(fn) {
   return (req, res, next) => fn(req, res, next).catch(next);
 }
 
