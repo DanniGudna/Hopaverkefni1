@@ -1,191 +1,399 @@
-# Hópverkefni 1
+## Hópverkefni 1
 
-Útfæra skal vefþjónustu fyrir „bókasafn“ með notendaumsjón. Gefin eru gögn fyrir bækur og flokka.
+# Upplýsingar um hvernig setja skuli upp verkefnið
 
-## Notendaumsjón
+## Hvernig gagnagrunnur og töflur eru settar upp og hvernig gögnum er komið inn í töflur
 
-Hægt á að vera að skrá notendur með nafni, notendanafni og lykilorði. Auðkenning skal fara fram með JWT og passport, token er úthlutað þegar `POST`að er á `/login`.
+### Verkefnið sótt og sett upp
+```bash
+> git clone https://github.com/DanniGudna/Hopaverkefni1.git
+> cd Hopverkefni1
+> npm i
+```
+### Gagnagrunnur settur upp og gögn sett inn í hann
+```bash
+> node createdb.js
+> node initdata.js
+```
 
-Útfæra þarf middleware sem passar upp á slóðir sem eiga að vera læstar séu læstar nema token sé sent með í `Authorization` haus í request.
+### Ræsa vefþjónustuna
+```bash
+> nodemon app.js
+```
 
-Eftir að notandi er innskráður er möguleiki á að setja inn mynd fyrir notanda með því að framkvæma `POST` á `/users/me/profile` með mynd (`.png`, `.jpg` eða `.jpeg`) í body á request. Þar sem ekki er hægt að vista myndir beint á disk á Heroku skal notast við [Cloudinary](https://cloudinary.com/), þjónustu sem geymir myndir og bíður upp á API til að vista, sækja og eiga við myndir. Heroku bíður upp á ókeypis útgáfu gegnum [Cloudinary add-on](https://elements.heroku.com/addons/cloudinary).
+Núna hefur allt verið gert svo hægt sé að byrja að vinna með gögn, bæta við og breyta.
 
-Flæði væri:
 
-1. Notandi sendir `multipart/form-data` `POST` á `/users/me/profile` með mynd
-2. Bakendi les mynd úr request, t.d. með [`multer`](https://github.com/expressjs/multer)
-3. Mynd er send á cloudinary API, sjá [Heroku: Cloudinary with node.js](https://devcenter.heroku.com/articles/cloudinary#using-with-node-js)
-4. Ef allt gengur eftir skilar Cloudinary JSON hlut með upplýsingum
-5. `url` úr svari er vistað í notenda töflu
+# Vefþjónustur
 
-## Gögn
+## Notendaskráning
 
-Útbúa þarf töflur fyrir eftirfarandi gögn, gefnar eru kröfur á gögnum sem passa þarf upp á þegar nýjar færslur eru gerðar eða eldri uppfærðar.
-
-* Notendur
-  - Auðkenni, _primary key_
-  - Notendanafn, _einstakt gildi_, a.m.k. 3 stafir, krafist
-  - Lykilorðs hash, lykilorð verður að vera a.m.k. 6 stafir, krafist
-  - Nafn, ekki tómi strengurinn, krafist
-  - Slóð á mynd, ekki krafist
-* Flokkar
-  - Auðkenni, _primary key_
-  - Heiti, _einstakt gildi_, ekki tómi strengurinn, krafist
-* Bækur
-  - Auðkenni, _primary key_
-  - Titill, _einstakt gildi_, ekki tómi strengurinn, krafist
-  - ISBN13, _einstakt gildi_, nákvæmlega 13 stafa strengur gerður úr tölum, krafist
-  - Höfundur, ekki krafist
-  - Lýsing, lengri texti, ekki krafist
-  - Flokkur, _foreign key_ í flokka töflu, krafist
-  - ISBN10, strengur, ekki krafist, ekki krafa að hafa með í verkefni
-  - Útgáfudagsetning, ekki krafist, strengur, ekki krafa að hafa með í verkefni
-  - Síðufjöldi, tala, stærri en 0, ekki krafist, ekki krafa að hafa með í verkefni
-  - Tungumál, 2 stafa strengur, ekki krafist, ekki krafa að hafa með í verkefni
-* Lesnar bækur notenda
-  - Auðkenni
-  - Auðkenni notanda, _foreign key_ í notanda töflu, krafist
-  - Auðkenni bókar, _foreign key_ í bóka töflu, krafist
-  - Einkunn notanda, gildi úr eftirfarandi lista `1, 2, 3, 4, 5` þar sem `1` er lægsta einkunn og `5` hæsta, krafist
-  - Dómur notanda, lengri texti, ekki krafist
-
-Þar sem merkt er _krafist_ verða gögn að innihalda gildi og þau að vera gild skv. lýsingu. Þar sem merkt er _ekki krafst_ má sleppa gildi í gögnum, bæði þegar eining er búin til og henni skilað.
-
-Þar sem merkt er _primary key_, _foreign key_ eða _einstakt gildi_ (unique) þarf að setja viðeigandi skoður á töflu, sjá https://www.postgresql.org/docs/current/static/ddl-constraints.html
-
-Gögn eru gefin innan `data/` möppu þar sem `books.csv` inniheldur 532 færslur, fyrsta lína skilgreinir dálka. Ef `"` kemur fyrir í texta er það kóðað sem `""`, t.d.
-`"Þetta er lýsing með ""gæsalöppum"""`. Gögn innihalda ekki nýlínu tákn.
-
-## Vefþjónustur
-
-Eftirfarandi slóðir eiga að vera til staðar, öll gögn sem send eru inn skulu vera á `JSON` formi og gögnum skilað á `JSON` formi.
+### Stofna nýjan notanda
 
 * `/register`
-  - `POST` býr til notanda og skilar án lykilorðs hash
+  - `POST` býr til notanda og skilar án lykilorðs hash. Það þarf að setja inn notendanafn, lykilorð og nafn á notanda á JSON formi.
+  - Dæmi: 
+  ```
+  {
+      "username": "<notendanafn>",
+      "name": "<nafn-notanda>",
+      "password": "<lykilord-notenda>"
+  }
+  ```
+
+### Skrá sig inn í kerfið
+
 * `/login`
-  - `POST` með notendanafni og lykilorði skilar token
+  - `POST` skráir inn notanda og skilar tokeni.
+  ```
+    {
+      "username": "<notendanafn>",
+      "password": "<lykilord-notenda>"
+    }
+  ```
+
+
+
+# Upplýsingar um notendur
+
+## Sjá alla notendur
+
 * `/users`
-  - `GET` skilar _síðu_ (sjá að neðan) af notendum
-  - Lykilorðs hash skal ekki vera sýnilegt
+  - `GET` Skilar síðu af notendum 
+  ```
+  {
+    "limit": 10,
+    "offset": 0,
+    "items": [
+        {
+            "id": 1,
+            "username": "admin",
+            "name": "",
+            "image": null
+        },
+    ...
+  ```
+
 * `/users/:id`
-  - `GET` skilar stökum notanda ef til
-  - Lykilorðs hash skal ekki vera sýnilegt
+  - `GET` Skilar síðu af einum notanda
+  - Dæmi: /users/1
+  ```
+  {
+    "id": 1,
+    "username": "admin",
+    "name": "",
+    "image": null
+  }
+  ```
+
 * `/users/me`
-  - `GET` skilar innskráðum notanda (þ.e.a.s. _þér_)
-  - `PATCH` uppfærir sendar upplýsingar um notanda fyrir utan notendanafn, þ.e.a.s. nafn eða lykilorð, ef þau eru gild
+  - `GET` Skilar síðu af þeim notanda sem er skráður inn
+  ```
+  {
+    "id": 62,
+    "username": "dan",
+    "name": "daniel",
+    "image": null
+  }
+  ```
+
+* `/users/me`
+  - `PATCH` Uppfærir upplýsingar um notanda ef upplýsingar eru gildar
+  ```
+  {
+    "name": "<nytt-nafn>"
+  }
+  ```
+
 * `/users/me/profile`
-  - `POST` setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
+  - `POST` Setur inn mynd fyrir notanda í gegnum Cloudinary. Uppfærir mynd ef mynd er núþegar til staðar.
+  ```
+  {
+    "image": "<slod>"
+  }
+  ```
+
+# Flokkar
+
+## Sjá alla flokka í gagnagrunninum
+
 * `/categories`
-  - `GET` skilar _síðu_ af flokkum
-  - `POST` býr til nýjan flokk og skilar
+  - `GET` Skilar öllum flokkunum sem eru til í gagnagrunninum.
+  ```
+  {
+    "limit": 10,
+    "offset": 0,
+    "items": [
+        {
+            "id": 1,
+            "title": "Computer Science"
+        },
+        {
+            "id": 2,
+            "title": "Science Fiction"
+        },
+    ...
+  }
+  ```
+
+## Setja inn nýjan flokk
+
+* `/categories`
+  - `POST` Setur inn mynd fyrir notanda í gegnum Cloudinary. Uppfærir mynd ef mynd er núþegar til staðar.
+  - Dæmi
+  ```
+  {
+	"title": "Bad Fantasy"
+  }
+  ```
+
+  Skilar
+
+  ```
+  {
+    "id": <númer-flokksins>,
+    "title": "Bad Fantasy"
+  }
+  ```
+
+# Bækur
+
+## Sækja upplýsingar um allar bækurnar
+
 * `/books`
-  - `GET` skilar _síðu_ af bókum
-  - `POST` býr til nýja bók ef hún er gild og skilar
+  - `GET` Sækir upplýsingar um allar bækurnar í gagnagrunninum.
+  ```
+  {
+    "limit": 10,
+    "offset": 0,
+    "items": [
+        {
+            "id": 1,
+            "title": "1984",
+            "author": "George Orwell",
+            "description": "Winston Smith is a worker at the Ministry of Truth, where he falsifies records for the party. Secretly subversive, he and his colleague Julia try to free themselves from political slavery but the price of freedom is betrayal.",
+            "isbn10": "451524934",
+            "isbn13": "9780451524935",
+            "category": 2,
+            "published": "",
+            "pagecount": "246",
+            "language": "en"
+        },
+    }
+    ...
+  ```
+
+## Býr til nýja bók
+
+* `/books`
+  - `POST` Býr til nýja bók ef öll gildin í BODY eru gild.
+  ```
+  {
+    "title": "<strengur-krafist>",
+    "author": "<strengur-ekki-krafist>",
+    "description": "<strengur-ekki-krafist>",
+    "isbn10": "<strengur-ekki-krafist>",
+    "isbn13": "<strengur-krafist>",
+    "category": <strengur-krafist>,
+    "published": "<strengur-ekki-krafist>",
+    "pagecount": "<heiltala-ekki-krafist>",
+    "language": "<strengur-ekki-krafist>"
+  }
+  ```
+
+## Leita af bók
+
 * `/books?search=query`
-  - `GET` skilar _síðu_ af bókum sem uppfylla leitarskilyrði, sjá að neðan
+  - `GET` Skilar niðurstöðum af bókum sem uppfylla skilyrði.
+  - Dæmi: /book?search=1984
+  ```
+  {
+    "limit": 10,
+    "offset": 0,
+    "items": [
+        {
+            "id": 1,
+            "title": "1984",
+            "author": "George Orwell",
+            "description": "Winston Smith is a worker at the Ministry of Truth, where he falsifies records for the party. Secretly subversive, he and his colleague Julia try to free themselves from political slavery but the price of freedom is betrayal.",
+            "isbn10": "451524934",
+            "isbn13": "9780451524935",
+            "category": 2,
+            "published": "",
+            "pagecount": "246",
+            "language": "en"
+        }
+    ]
+  }
+  ```
+
+  ## Leita af bók frá ID
+
 * `/books/:id`
-  - `GET` skilar stakri bók
-  - `PATCH` uppfærir bók
+  - `GET` Skilar upplýsingum um ákveðna bók út frá ID
+  - Dæmi: /books/2
+  ```
+  {
+    "id": 2,
+    "title": "1Q84",
+    "author": "Haruki Murakami",
+    "description": "The internationally best-selling and award-winning author of such works as What I Talk About When I Talk About Running presents a psychologically charged tale that draws on Orwellian themes. 100,000 first printing.",
+    "isbn10": "307593312",
+    "isbn13": "9780307593313",
+    "category": 11,
+    "published": "2011",
+    "pagecount": "925",
+    "language": "en"
+  }
+  ```
+
+  ## Uppfæra bók frá ID
+
+* `/books/:id`
+  - `PATCH` Uppfærir upplýsingar um bók mv. þeim upplýsingum sem eru gefnar.
+  - Dæmi: /books/2
+  ```
+  {
+    "author": "Sensei Haruki Murakami",
+    "published": "2010",
+    "language": "is"
+  }
+  ```
+  - Skilar
+  ```
+  {
+    "id": 2,
+    "title": "1Q84",
+    "author": "Sensei Haruki Murakami",
+    "description": "The internationally best-selling and award-winning author of such works as What I Talk About When I Talk About Running presents a psychologically charged tale that draws on Orwellian themes. 100,000 first printing.",
+    "isbn10": "307593312",
+    "isbn13": "9780307593313",
+    "category": 11,
+    "published": "2010",
+    "pagecount": "925",
+    "language": "is"
+  }
+  ```
+
+
+# Bókalestur
+
+## Lestur ákveðins notanda
+
 * `/users/:id/read`
-  - `GET` skilar _síðu_ af lesnum bókum notanda
+  - `GET` Sækir bækur sem notandi <:id> hefur lesið.
+  - Dæmi: /user/62/read
+  ```
+  {
+    "limit": 10,
+    "offset": 0,
+    "items": [
+        {
+            "id": 6,
+            "book_id": 1,
+            "user_id": 62,
+            "rating": 5,
+            "review": ""
+        },
+        {
+            "id": 7,
+            "book_id": 2,
+            "user_id": 62,
+            "rating": 5,
+            "review": "5/7"
+        }
+    ]
+  }
+  ```
+
+## Lestur innskráðs notanda
+
 * `/users/me/read`
-  - `GET` skilar _síðu_ af lesnum bókum innskráðs notanda
-  - `POST` býr til nýjan lestur á bók og skilar
+  - `GET` Skilar lista af bókum sem innskráður notandu hefur lesið.
+  ```
+  {
+    "limit": 10,
+    "offset": 0,
+    "items": [
+        {
+            "id": 6,
+            "book_id": 1,
+            "user_id": 62,
+            "rating": 5,
+            "review": ""
+        },
+        {
+            "id": 7,
+            "book_id": 2,
+            "user_id": 62,
+            "rating": 5,
+            "review": "5/7"
+        }
+    ]
+  }
+  ```
+
+
+* `/users/me/read`
+  - `POST` Skrár inn bók sem notandi hefur lesið
+  ```
+  {
+    "bookId": <heiltala-krafist>,
+    "rating": <heiltala-krafist(1-5)>,
+    "review": <strengur-ekki-krafist>
+  }
+  ```
+  - Dæmi
+  ```
+  {
+    "bookId": 2,
+    "rating": 5,
+    "review": "5/7"
+  }
+  ```
+
+  - Skilar
+  ```
+  {
+    "id": <id-umfjöllunar>,
+    "book_id": 2,
+    "user_id": <id-notanda>,
+    "rating": 5,
+    "review": "5/7"
+  }
+  ```
 * `/users/me/read/:id`
-  - `DELETE` eyðir lestri bókar fyrir innskráðann notanda
+  - `DELETE` Eyðir bók út af lestra-listra
+  - Dæmi: /user/me/read/20
+  ```
+  {
+    "limit": 10,
+    "offset": 0,
+    "items": [
+        {
+            "id": 6,
+            "book_id": 1,
+            "user_id": 62,
+            "rating": 5,
+            "review": ""
+        },
+        {
+            "id": 7,
+            "book_id": 2,
+            "user_id": 62,
+            "rating": 5,
+            "review": "5/7"
+        }
+    ]
+  }
+  ```
 
-Þegar gögn eru sótt,  búin til eða uppfærð þarf að athuga hvort allt sé gilt og einingar séu til og skila viðeigandi status kóðum/villuskilaboðum ef svo er ekki.
 
-Fyrir notanda sem ekki er skráður er inn skal vera hægt að:
+# Nemendur
 
-* Skoða allar bækur og flokka
-* Leita að bókum
-
-Fyrir innskráðan notanda skal einnig vera hægt að:
-
-* Uppfæra upplýsingar um sjálfan sig
-* Skrá nýja bók
-* Uppfæra bók
-* Skrá nýjan flokk
-* Skrá lestur á bók
-* Eyða lestur á bók
-
-### Síður (paging)
-
-Fyrir fyrirspurnir sem skila listum af gögnum þarf að _page_a_ þau gögn. Þ.e.a.s. að sækja aðeins takmarkað magn úr heildarlista í einu og láta vita af næstu síðu. Þetta kemur í veg fyrir að við sækjum of mikið af efni í einu, t.d. ef gagnagrunnur myndi innihalda tugþúsundir bóka og notanda.
-
-Til að útfæra með postgres nýtum við [`LIMIT` og `OFFSET`](https://www.postgresql.org/docs/current/static/queries-limit.html) í fyrirspurnum. Við útfærum almennu fyrirspurnina (með `ORDER BY <dálk til að raða eftir>`) en bætum síðan við t.d. `LIMIT 10 OFFSET 0` sem biður um fyrstu 10 niðurstöður, `LIMIT 10 OFFSET 10` myndi skila okkur næstu 10, þ.e. frá 11-20 o.s.fr.
-
-Upplýsingum um limit og offset skal skila í svari ásamt gögnum á forminu:
-
-```json
-{
-  "limit": 10,
-  "offset": 0,
-  "items": [
-    // 10 hlutir úr svari
-  ]
-}
-```
-
-### Leit
-
-Aðeins þarf að leita í bókatöflu í reitunum titil og lýsingarreitum. Postgres býður upp á textaleit í töflum án þess að setja upp eitthvað sérstakt, sjá [Chapter 12. Full Text Search: Tables and Indexes](https://www.postgresql.org/docs/current/static/textsearch-tables.html).
-
-## Annað
-
-Ekki þarf að útfæra „týnt lykilorð“ virkni.
-
-Bækur geta aðeins verið í einum flokk.
-
-Þegar gögn eru flutt inn í gagnagrunn getur verið gott að nýta `await` í lykkju þó að eslint mæli gegn því. Ef t.d. er reynt að setja inn yfir 500 færslur í einu í gagnagrunn með `Promise.all`, getur tenging rofnað vegna villu.
-
-## Hópavinna
-
-Verkefnið skal unnið í hóp, helst með þremur einstaklingum. Hópar með tveim eða fjórum einstaklingum eru einnig í lagi. Hafið samband við kennara ef ekki tekst eða ekki mögulegt að vinna í hóp.
-
-## README
-
-Í rót verkefnis skal vera `README.md` skjal sem tilgreinir:
-
-* Upplýsingar um hvernig setja skuli upp verkefnið
-  - Hvernig gagnagrunnur og töflur eru settar upp
-  - Hvernig gögnum er komið inn í töflur
-* Dæmi um köll í vefþjónustu
-* Nöfn og notendanöfn allra í hóp
-
-## Git og GitHub
-
-Verkefni þetta er sett fyrir á GitHub og almennt ætti að skila því úr einka (private) repo nemanda. Nemendur geta fengið gjaldfrjálsan aðgang að einka repos á meðan námi stendur, sjá https://education.github.com/.
-
-Til að byrja er hægt að afrita þetta repo og bæta við á sínu eigin:
-
-```bash
-> git clone https://github.com/vefforritun/vef2-2018-h1.git
-> cd vef2-2018-h1
-> git remote remove origin # fjarlægja remote sem verkefni er í
-> git remote add origin <slóð á repo> # bæta við í þínu repo
-> git push
-```
-
-## Mat
-
-* 20% – Töflur og gögn lesin inn
-* 30% – Auðkenning og notendaumsjón
-* 50% – Vefþjónusta
-
-## Sett fyrir
-
-Verkefni sett fyrir í fyrirlestri fimmtudaginn 22. febrúar 2018.
-
-## Skil
-
-Einn aðili í hóp skal skila fyrir hönd allra og skila skal undir „Verkefni og hlutaprófa“ á Uglu í seinasta lagi fyrir lok dags fimmtudaginn 15. mars 2018.
-
-Skilaboð skulu innihalda slóð á GitHub repo fyrir verkefni, slóð á Heroku og nöfn allra þá sem eru í hópnum. Dæmatímakennurum skal hafa verið boðið í repo ([sjá leiðbeiningar](https://help.github.com/articles/inviting-collaborators-to-a-personal-repository/)). Notendanöfn þeirra eru `ernir` og `elvarhelga`.
-
-## Einkunn
-
-Sett verða fyrir sex minni verkefni þar sem fimm bestu gilda 6% hvert, samtals 30% af lokaeinkunn.
-
-Sett verða fyrir tvö hópa verkefni þar sem hvort um sig gildir 15%, samtals 30% af lokaeinkunn.
+## Alexander Freyr Sveinsson
+### 
+## Daníel Guðnason
+### 
+## Daníel Ingólfsson
+### dai5@HÁ Í
