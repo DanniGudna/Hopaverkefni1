@@ -41,16 +41,7 @@ router.get('/me', requireAuthentication, (req, res) => {
 
 router.patch('/me', requireAuthentication, async (req, res) => { // eslint-disable-line
   const { password, name } = req.body;
-  let q;
-  if (password && name) {
-    q = 'UPDATE users SET fname = ($1), passwd = ($2) WHERE (id) = ($3)';
-    users.query(q, [password, name, req.user.id]);
-  } else if (password) {
-    q = 'UPDATE users SET passwd = ($2) WHERE (id) = ($3)';
-  } else if (name) {
-    q = 'UPDATE users SET fname = ($1) WHERE (id) = ($3)';
-  }
-  const u = await users.query(q, [password, name, req.user.id]);
+  const u = await users.patchUser(password, name);
   return res.json(u);
 });
 
@@ -93,26 +84,17 @@ router.get('/:id', async (req, res) => {
   res.status(status).json(data);
 });
 
-/* `/users/:id/read`
-  - `GET` skilar _síðu_ af lesnum bókum notanda -ekki rdy
-  */
 async function userIdRead(req, res) {
   const { id } = req.params;
-  console.log('id', id);
   const offset = req.query;
   const get = await getReadUser(id, offset);
   if (get.error === null) {
-    console.log("ping")
     return res.json(get.item);
   }
-  console.log("ping2")
   return res.status(404).json(get.error);
 }
 
-
-
 router.get('/me/read', requireAuthentication, async (req, res) => {
-
   const { id } = req.user;
   const offset = req.query;
   const get = await getReadUser(id, offset);

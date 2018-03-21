@@ -71,10 +71,7 @@ async function validateCategory(category) {
     await client.connect();
     const check = 'SELECT * FROM categories WHERE category = ($1)';
     const duplicateCheck = await client.query(check, [xss(category)]);
-    console.log('DUPLICATECHECK.ROWS.LENGTH', duplicateCheck.rows.length)
-    console.log('DUPLICATECHECK.ROWS', duplicateCheck.rows)
     if (duplicateCheck.rows.length > 0) {
-      console.log('CONDITION PASSED')
       errors.push({ field: 'category', message: 'category exists' });
     }
     await client.end();
@@ -235,7 +232,6 @@ async function validateBook(
  * @returns {Promise} returns array of objects of error messages
  */
 async function validatePatch(books) {
-  console.log('BOOKS', books)
   const errors = [];
   const [
     title,
@@ -249,10 +245,7 @@ async function validatePatch(books) {
     language,
   ] = books;
 
-  // title check
-  console.log('TITLE', title)
   if (title) {
-    console.log('CONDITION PASSED')
     if (typeof (title) !== 'string') {
       errors.push({ field: 'Title', message: 'title must be a string' });
     } else if (!validator.isLength(title, { min: 1, max: 255 })) {
@@ -329,17 +322,13 @@ async function validatePatch(books) {
   }
 
   // PAGECOUNT
-  // TODO: athuga med int
   if (pagecount) {
     if (typeof (pagecount) !== 'number') {
       errors.push({ field: 'pagecount', message: 'pagecount must be a number' });
     }
   }
   // language
-
-  console.log('LANGUAGE', language)
   if (language) {
-    console.log('CONDITION PASSED')
     if (typeof (language) !== 'string') {
       errors.push({ field: 'language', message: 'language must be a string' });
     } else if (!validator.isLength(language, { min: 2, max: 2 })) {
