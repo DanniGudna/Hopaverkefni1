@@ -34,6 +34,7 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 * @returns {Promise} Promise representing an object containing either array of
 * the books for the page or the error message
 */
+
 async function getBooks(offset, limit, search) {
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);

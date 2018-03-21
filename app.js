@@ -1,21 +1,18 @@
-require('dotenv').config(); // eslint-disable-line
+require('dotenv').config();
 
-const express = require('express'); // eslint-disable-line
-const cookieParser = require('cookie-parser'); // eslint-disable-line
-const session = require('express-session'); // eslint-disable-line
-const helmet = require('helmet'); // eslint-disable-line
-const { Strategy, ExtractJwt } = require('passport-jwt'); // eslint-disable-line
-const users = require('./db.js');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const helmet = require('helmet');
+const { Strategy, ExtractJwt } = require('passport-jwt');
+const users = require('./db');
 const jwt = require('jsonwebtoken');
-const cloudinary = require('cloudinary');
-const multer = require('multer');
 
-const uploads = multer({ dest: './temp' });
 const { passport } = require('./utils.js');
 
 const {
   JWT_SECRET: jwtSecret,
-  TOKEN_LIFETIME: tokenLifetime = 20,
+  TOKEN_LIFETIME: tokenLifetime = 20000,
 } = process.env;
 
 if (!jwtSecret) {
@@ -97,7 +94,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-async function validateUser(username, password) { // eslint-disable-line
+async function validateUser(username, password) {
   if (typeof username !== 'string' || username.length < 2) {
     return 'Notendanafn verður að vera amk 2 stafir';
   }
@@ -113,32 +110,8 @@ async function validateUser(username, password) { // eslint-disable-line
   }
 }
 
-app.post('/image', uploads.single('image'), async (req, res, next) => {
-  const { file: { path } = {} } = req;
-  if (!path) {
-    return res.json({ message: 'gat ekki lesið mynd' });
-  }
-  if (!req.isAuthenticated()) {
-    return res.json({ message: 'thu tharft ad skra thig inn' });
-  }
-
-  let upload = null;
-
-  try {
-    upload = await cloudinary.v2.uploader.upload(path);
-  } catch (error) {
-    console.error('Unable to upload file to cloudinary:', path);
-    return next(error);
-  }
-
-  const { secure_url } = upload; // eslint-disable-line
-  const r = await users.insertPic(res.locals.user, secure_url);
-  return res.json({ user: r });
-});
-
-
-async function register(req, res, next) {
-  const { username, password, name } = req.body;
+async function register({ username, name, password } = {}) {
+  /* const { username, password, name } = req.body;
 
   const validationMessage = await validateUser(username, password);
 
@@ -146,31 +119,51 @@ async function register(req, res, next) {
     res.json({ message: validationMessage });
   }
 
-  const result = await users.createUser(username, password, name); // eslint-disable-line
+  const result = await users.createUser(username, password, name);
 
   // næsta middleware mun sjá um að skrá notanda inn því hann verður til
   // og `username` og `password` verða ennþá sett sem rétt í `req`
-  next();
+  next(); */
+   // eslint-disable-line
+  const validationMessage = await validateUser(username, password);
+  if (validationMessage) {
+    return { status: 400, data: validationMessage };
+  }
+
+  const output = await users.createUser(username, password, name);
+
+  return { status: 200, data: output };
 }
 
+
 // registers new user
-app.post(
-  '/register',
+app.post('/register', async (req, res) => {
+  /*
   register,
   passport.authenticate('local', {
     failureRedirect: '/login',
   }),
   (req, res) => {
     res.redirect('/admin');
-  },
-);
+  }, */
+  const {
+    username,
+    name,
+    password,
+  } = req.body;
+
+  const { status, data } = await register({
+    username, name, password,
+  });
+  return res.status(status).json(data);
+});
 
 
-function notFoundHandler(req, res, next) { // eslint-disable-line
+function notFoundHandler(req, res, next) {
   res.status(404).json({ title: '404 villa' });
 }
 
-function errorHandler(err, req, res, next) { // eslint-disable-line
+function errorHandler(err, req, res, next) {
   console.error(err);
   res.status(500).json({ err });
 }
