@@ -15,14 +15,14 @@ const connectionString = process.env.DATABASE_URL || 'postgres://:@localhost/hop
 async function getBookByTitle(title) {
   const client = new Client({ connectionString });
   const q = 'SELECT * FROM books WHERE title = ($1)';
-  const result = ({ error: '', item: '' });
+  const result = ({ error: '', item: [[]] });
   // no need for a validation it is validatad elsewhere
 
   try {
     await client.connect();
     const dbResult = await client.query(q, [xss(title)]);
     await client.end();
-    result.item = dbResult.rowCount;
+    result.item = dbResult.rows;
     result.error = null;
   } catch (err) {
     console.info(err);
@@ -37,7 +37,7 @@ async function getBookByTitle(title) {
  *
  * @param {number} num - a number
  *
- * @returns {array} an array of error messages if there are any
+ * @returns {Promise} an array of error messages if there are any
  */
 async function validateNum(num) {
   const errors = [];
@@ -57,7 +57,7 @@ async function validateNum(num) {
  * Validates category
  * @param {string} category - category to create
  *
- * @returns {array} returns array of objects of error messages
+ * @returns {Promise} returns error messages
  */
 async function validateCategory(category) {
   const errors = [];
@@ -88,18 +88,14 @@ async function validateCategory(category) {
  * @param {number} offset - offset
  * @param {number} limit - limit
  *
- * @returns {array} an array of error messages if there are any
+ * @returns {Promise} an array of error messages if there are any
  */
 async function validatePaging(offset, limit) {
   const errors = [];
-
-  // offset check
-  if (typeof (offset) !== 'number') {
+  if (Number.isNaN(offset)) {
     errors.push({ field: 'offset', message: 'offset must be a number' });
   }
-
-  // limit check
-  if (typeof (limit) !== 'number') {
+  if (Number.isNaN(limit)) {
     errors.push({ field: 'limit', message: 'limit must be a number' });
   }
 
@@ -235,7 +231,7 @@ async function validateBook(
  * @param {string} books.language - language of the book- must be 2 letters
  * @returns {Promise} returns array of objects of error messages
  */
-async function validatePatch({ books } = {}) {
+async function validatePatch(books) {
   const errors = [];
   const {
     title,
