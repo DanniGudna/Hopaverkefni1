@@ -10,8 +10,7 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
 router.get('/', async (req, res) => {
-  const { offset } = req.query;
-  const data = await getAll(offset);
+  const data = await getAll();
 
   res.status(200).json(data);
 });
@@ -62,14 +61,8 @@ router.post('/me/profile', requireAuthentication, uploads.single('image'), async
   return res.json({ user: r });
 });
 
-router.post('/me/read', requireAuthentication, (req, res) => {
-  const {
-    bookID,
-    rating,
-    review,
-  } = req.query;
-  const d = users.addBookReadBy(req.user.id, bookID, rating, review);
-  res.json(d);
+router.get('/me/read', requireAuthentication, (req, res) => {
+  res.json({ message: 'hello' });
 });
 
 router.get('/:id', async (req, res) => {
@@ -83,5 +76,15 @@ router.delete('/me/read/:id', (req, res) => {
   const { id } = req.body;
   res.json({ message: id });
 });
+/* `/users/:id/read`
+  - `GET` skilar _síðu_ af lesnum bókum notanda -ekki rdy
+  */
+async function userIdRead(req, res) {
+  const id = req.param;
+  
+
+}
+
+router.get('/users/:id/read', catchErrors(userIdRead));
 
 module.exports = router;
