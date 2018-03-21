@@ -68,7 +68,7 @@ async function findByUsername(username) {
 
 async function findById(id) {
   const client = new Client({ connectionString });
-  const query = 'SELECT id, username, name, photo FROM users WHERE id = $1';
+  const query = 'SELECT id, username, fname, avatar FROM users WHERE id = $1';
   await client.connect();
 
   try {
