@@ -23,7 +23,9 @@ async function getCategories(offset, limit) {
   const lim = (typeof limit === 'undefined') ? 10 : parseInt(limit, 10);
 
   const q = 'SELECT category FROM categories LIMIT ($1) OFFSET ($2)';
-  const result = ({ error: '', item: '' });
+  const result = ({
+    error: '', item: '', offset: off, limit: lim,
+  });
   const validation = await validatePaging(off, lim);
 
 

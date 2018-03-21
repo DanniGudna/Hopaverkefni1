@@ -9,7 +9,7 @@ const {
   getBooks,
   postBook,
   getBookId,
-  patchBookId, // eslint-disable-line
+  patchBookId,
 } = require('./booksDB');
 
 const router = express.Router();
@@ -42,7 +42,10 @@ async function categoriesGet(req, res) {
   const { offset, limit } = req.query;
   const allCategories = await getCategories(offset, limit);
   if (allCategories.error === null) {
-    return res.json(allCategories.item);
+    const result = ({
+      offset: allCategories.offset, limit: allCategories.limit, items: allCategories.item,
+    });
+    return res.json(result);
   }
   return res.json(allCategories.error);
 }
@@ -58,11 +61,11 @@ async function categoryPost(req, res) {
 
 // GET á /books
 async function booksGet(req, res) {
-  const { offset, limit } = req.query;
-  const allBooks = await getBooks(offset, limit);
+  const { offset, limit, search } = req.query;
+  const allBooks = await getBooks(offset, limit, search);
   if (allBooks.error === null) {
-    console.info(`ping: ${allBooks.item}`);
-    return res.json(allBooks.item);
+    const result = ({ offset: allBooks.offset, limit: allBooks.limit, items: allBooks.item });
+    return res.json(result);
   }
   return res.json(allBooks.error);
 }
@@ -86,10 +89,44 @@ async function booksPost(req, res) {
 async function booksID(req, res) {
   const { id } = req.params;
   const get = await getBookId(id);
-  if (get.length !== null) {
-    return res.json(get);
+  if (get.error === null) {
+    return res.json(get.item);
   }
   return res.status(404).json(get.error);
+}
+
+async function booksPatch(req, res) {
+  const {
+    title,
+    isbn13,
+    author,
+    description,
+    category,
+    isbn10,
+    published,
+    pagecount,
+    language,
+  } = req.body;
+  const { id } = req.params;
+  const data = await patchBookId(
+    Number(id),
+    {
+      title,
+      isbn13,
+      author,
+      description,
+      category,
+      isbn10,
+      published,
+      pagecount,
+      language,
+    },
+  );
+
+  if (data.error === null) {
+    return res.json(data.item);
+  }
+  return res.json(data.error);
 }
 
 function catchErrors(fn) {
@@ -105,4 +142,5 @@ router.post('/categories/', catchErrors(categoryPost));
 router.post('/books/', catchErrors(booksPost));
 router.get('/books', catchErrors(booksGet));
 router.get('/books/:id', catchErrors(booksID));
+router.patch('/books/:id', catchErrors(booksPatch));
 module.exports = router;
