@@ -132,13 +132,13 @@ app.post('/register', async (req, res) => {
   const { status, data } = await register({
     username, name, password,
   });
-  const user = {
+  const u = {
     id: data.id,
     user: data.username,
     name: data.fname,
     avatar: data.avatar,
   } // eslint-disable-line
-  return res.status(status).json(user);
+  return res.status(status).json(u);
 });
 
 
