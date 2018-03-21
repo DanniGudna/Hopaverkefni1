@@ -110,8 +110,8 @@ async function validateUser(username, password) { // eslint-disable-line
 
   if (typeof (password) !== 'string') {
     return 'Lykilorð verður að vera strengur';
-  } else if (!validator.isLength(username, { min: 6 })) {
-    return 'Lykilorð verður að vera amk 2 stafir';
+  } else if (!validator.isLength(password, { min: 6 })) {
+    return 'Lykilorð verður að vera amk 6 stafir';
   }
 }
 

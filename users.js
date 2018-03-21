@@ -91,11 +91,13 @@ router.get('/:id', async (req, res) => {
 
 async function userIdRead(req, res) {
   const { id } = req.params;
+
   const offset = req.query;
   const get = await getReadUser(id, offset);
   if (get.error === null) {
     return res.json(get.item);
   }
+
   return res.status(404).json(get.error);
 }
 
