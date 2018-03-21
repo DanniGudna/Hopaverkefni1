@@ -14,7 +14,6 @@ router.get('/', async (req, res) => {
   const data = await getAll(offset);
   const ubers = [];
   for (let i = 0; i < data.length; i += 1) {
-    console.info(i);
     ubers.push({
       id: data[i].id,
       user: data[i].username,
