@@ -6,7 +6,7 @@ const multer = require('multer');
 
 const {
   getReadUser,
-} = require('./user-db');
+} = require('./users-db.js');
 
 const uploads = multer({ dest: './temp' }); // eslint-disable-line
 

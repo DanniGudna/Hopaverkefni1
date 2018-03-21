@@ -117,8 +117,14 @@ async function register({ username, name, password } = {}) {
   }
 
   const output = await users.createUser(username, password, name);
+  const u = {
+    id: output.id,
+    user: output.username,
+    name: output.fname,
+    avatar: output.avatar,
+  } // eslint-disable-line
 
-  return { status: 200, data: output };
+  return { status: 200, data: u };
 }
 
 
@@ -132,13 +138,8 @@ app.post('/register', async (req, res) => {
   const { status, data } = await register({
     username, name, password,
   });
-  const u = {
-    id: data.id,
-    user: data.username,
-    name: data.fname,
-    avatar: data.avatar,
-  } // eslint-disable-line
-  return res.status(status).json(u);
+
+  return res.status(status).json(data);
 });
 
 
@@ -162,4 +163,3 @@ const {
 app.listen(port, () => {
   console.info(`Server running at http://${host}:${port}/`);
 });
-
