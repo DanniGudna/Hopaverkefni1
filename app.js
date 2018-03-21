@@ -98,7 +98,7 @@ async function validateUser(username, password) { // eslint-disable-line
   if (typeof username !== 'string' || username.length < 2) {
     return 'Notendanafn verður að vera amk 2 stafir';
   }
-
+ 
   const u = await users.findByUsername(username);
 
   if (u) {
