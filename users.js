@@ -17,19 +17,24 @@ router.get('/', async (req, res) => {
 
 
 router.get('/me', requireAuthentication, (req, res) => {
-  res.json(req.user);
+  const data = {
+    username: req.user.username,
+    name: req.user.fname,
+    avatar: req.user.avatar,
+  };
+  res.json(data);
 });
 
 router.patch('/me', requireAuthentication, async (req, res) => { // eslint-disable-line
   const { password, name } = req.body;
   let q;
   if (password && name) {
-    q = 'UPDATE users SET name = ($1), passwd = ($2) WHERE (id) = ($3)';
+    q = 'UPDATE users SET fname = ($1), passwd = ($2) WHERE (id) = ($3)';
     users.query(q, [password, name, req.user.id]);
   } else if (password) {
-    q = 'UPDATE users SET name = ($1), passwd = ($2) WHERE (id) = ($3)';
+    q = 'UPDATE users SET passwd = ($2) WHERE (id) = ($3)';
   } else if (name) {
-    q = 'UPDATE users SET name = ($1), passwd = ($2) WHERE (id) = ($3)';
+    q = 'UPDATE users SET fname = ($1) WHERE (id) = ($3)';
   }
   const u = await users.query(q, [password, name, req.user.id]);
   return res.json(u);
@@ -57,7 +62,6 @@ router.post('/me/profile', requireAuthentication, uploads.single('image'), async
 });
 
 router.get('/me/read', requireAuthentication, (req, res) => {
-
   res.json({ message: 'hello' });
 });
 
