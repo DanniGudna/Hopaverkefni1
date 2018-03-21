@@ -137,18 +137,6 @@ async function register(user) {
   return { status: 200, data: output[0] };
 }
 
-/**
- *`/users/:id/read`
- *  - `GET` skilar _síðu_ af lesnum bókum notanda
- *
- * @param {Int} id - id of the user to get
- *
- * @returns {Object} Promise representing the user object if exists
- */
-async function getIdRead(id, offset) {
-     
-}
-
 module.exports = {
   getAll,
   getOneById,

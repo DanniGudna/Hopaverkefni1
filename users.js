@@ -4,6 +4,10 @@ const { requireAuthentication, cloudinary } = require('./utils.js');
 const users = require('./db.js');
 const multer = require('multer');
 
+const {
+  getReadUser,
+} = require('./user-db');
+
 const uploads = multer({ dest: './temp' }); // eslint-disable-line
 
 const router = express.Router();
@@ -81,8 +85,16 @@ router.delete('/me/read/:id', (req, res) => {
   */
 async function userIdRead(req, res) {
   const id = req.param;
-  
+  const offset = req.query;
+  const get = await getReadUser(id, offset);
+  if (get.error === null) {
+    return res.json(get.item);
+  }
+  return res.status(404).json(get.error);
+}
 
+function catchErrors(fn) {
+  return (req, res, next) => fn(req, res, next).catch(next);
 }
 
 router.get('/users/:id/read', catchErrors(userIdRead));
