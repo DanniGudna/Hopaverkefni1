@@ -79,9 +79,9 @@ async function getAll(offset) {
 /**
  * Get one user by id
  *
- * @param {Int} id - id of the user to get
+ * @param {string} id - id of the user to get
  *
- * @returns {Object} Promise representing the user object if exists
+ * @returns {Promise} Promise representing the user object if exists
  */
 async function getOneById(id) {
   if (!validateId(id)) {
