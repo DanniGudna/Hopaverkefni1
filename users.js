@@ -17,7 +17,12 @@ router.get('/', async (req, res) => {
 
 
 router.get('/me', requireAuthentication, (req, res) => {
-  res.json(req.user);
+  const data = {
+    username: req.user.username,
+    name: req.user.fname,
+    avatar: req.user.avatar,
+  };
+  res.json(data);
 });
 
 router.patch('/me', requireAuthentication, async (req, res) => { // eslint-disable-line
@@ -57,7 +62,6 @@ router.post('/me/profile', requireAuthentication, uploads.single('image'), async
 });
 
 router.get('/me/read', requireAuthentication, (req, res) => {
-
   res.json({ message: 'hello' });
 });
 
