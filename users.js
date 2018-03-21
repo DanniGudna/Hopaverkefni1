@@ -4,12 +4,17 @@ const { requireAuthentication, cloudinary } = require('./utils.js');
 const users = require('./db.js');
 const multer = require('multer');
 
+const {
+  getReadUser,
+} = require('./user-db');
+
 const uploads = multer({ dest: './temp' }); // eslint-disable-line
 
 const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
 router.get('/', async (req, res) => {
+
   const { offset } = req.query;
   const data = await getAll(offset);
   const ubers = [];
@@ -70,14 +75,8 @@ router.post('/me/profile', requireAuthentication, uploads.single('image'), async
   return res.json({ user: r });
 });
 
-router.post('/me/read', requireAuthentication, (req, res) => {
-  const {
-    bookID,
-    rating,
-    review,
-  } = req.query;
-  const d = users.addBookReadBy(req.user.id, bookID, rating, review);
-  res.json(d);
+router.get('/me/read', requireAuthentication, (req, res) => {
+  res.json({ message: 'hello' });
 });
 
 router.get('/:id', async (req, res) => {
@@ -91,5 +90,23 @@ router.delete('/me/read/:id', (req, res) => {
   const { id } = req.body;
   res.json({ message: id });
 });
+/* `/users/:id/read`
+  - `GET` skilar _síðu_ af lesnum bókum notanda -ekki rdy
+  */
+async function userIdRead(req, res) {
+  const id = req.param;
+  const offset = req.query;
+  const get = await getReadUser(id, offset);
+  if (get.error === null) {
+    return res.json(get.item);
+  }
+  return res.status(404).json(get.error);
+}
+
+function catchErrors(fn) {
+  return (req, res, next) => fn(req, res, next).catch(next);
+}
+
+router.get('/users/:id/read', catchErrors(userIdRead));
 
 module.exports = router;
