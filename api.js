@@ -10,7 +10,6 @@ const {
   postBook,
   getBookId,
   patchBookId,
-  getOriginalValue,
 } = require('./booksDB');
 
 const router = express.Router();
@@ -44,7 +43,7 @@ async function categoriesGet(req, res) {
   const allCategories = await getCategories(offset, limit);
   if (allCategories.error === null) {
     const result = ({
-      offset: allCategories.offset, limit: allCategories.limit, items: allCategories.item
+      offset: allCategories.offset, limit: allCategories.limit, items: allCategories.item,
     });
     return res.json(result);
   }
@@ -65,10 +64,8 @@ async function booksGet(req, res) {
   const { offset, limit, search } = req.query;
   const allBooks = await getBooks(offset, limit, search);
   if (allBooks.error === null) {
-
     const result = ({ offset: allBooks.offset, limit: allBooks.limit, items: allBooks.item });
     return res.json(result);
-
   }
   return res.json(allBooks.error);
 }
@@ -92,7 +89,6 @@ async function booksPost(req, res) {
 async function booksID(req, res) {
   const { id } = req.params;
   const get = await getBookId(id);
-  console.log('GET', get);
   if (get.error === null) {
     return res.json(get.item);
   }
@@ -124,12 +120,11 @@ async function booksPatch(req, res) {
       published,
       pagecount,
       language,
-    }
+    },
   );
 
   if (data.error === null) {
     return res.json(data.item);
-
   }
   return res.json(data.error);
 }
