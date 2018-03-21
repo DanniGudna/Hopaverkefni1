@@ -95,7 +95,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-async function validateUser(username, password) {
+async function validateUser(username, password) { // eslint-disable-line
   if (typeof (username) !== 'string') {
     return 'Notendanafn verður að vera strengur';
   } else if (!validator.isLength(username, { min: 2 })) {
@@ -127,13 +127,11 @@ async function register(username, name, password) {
     user: output.username,
     name: output.fname,
     avatar: output.avatar,
-  } // eslint-disable-line
+  };
 
   return { status: 200, data: u };
 }
 
-
-// registers new user
 app.post('/register', async (req, res) => {
   const {
     username,

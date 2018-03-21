@@ -218,7 +218,6 @@ async function patchBook(id, book) {
     ]);
     await client.end();
     result.item = dbResult.rows[index];
-    // console.log('RESULT.ITEM', result.item)
     result.error = null;
     return result;
   } catch (err) {
@@ -285,7 +284,6 @@ async function patchBookId(id, books) {
 
   // validata það sem er ekki tómt
   const validation = await validatePatch(val);
-  console.log('VALIDATION', validation);
 
   if (validation.length === 0) {
     // patcha allt saman
@@ -297,9 +295,7 @@ async function patchBookId(id, books) {
     // annars returna errors
     result.error = validation;
   }
-  console.log('RESULT', result)
   return result;
-
 }
 
 module.exports = {
