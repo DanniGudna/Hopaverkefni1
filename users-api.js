@@ -70,8 +70,8 @@ function validateId(id) {
  *
  * @returns {Promise} Promise representing the object containing all users
  */
-async function getAll() {
-  const output = await getAllUsers();
+async function getAll(offset) {
+  const output = await getAllUsers(offset);
 
   return output;
 }

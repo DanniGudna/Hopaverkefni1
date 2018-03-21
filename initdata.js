@@ -15,7 +15,7 @@ const allBooks = [];
 
 async function insert() {
   for (let i = 0; i < allBooks.length; i += 1) {
-    await postBook(allBooks[i]);
+    await postBook(allBooks[i]); // eslint-disable-line
   }
   console.info('=== Books Added ===');
 }

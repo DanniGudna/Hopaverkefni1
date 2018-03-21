@@ -10,7 +10,8 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
 router.get('/', async (req, res) => {
-  const data = await getAll();
+  const { offset } = req.query;
+  const data = await getAll(offset);
 
   res.status(200).json(data);
 });

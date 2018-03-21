@@ -1,37 +1,17 @@
 const bcrypt = require('bcrypt');
 const { Client } = require('pg');
+const xss = require('xss');
 
 const connectionString = process.env.DATABASE_URL;
 
-/*
-
-async function query(q, values = []) {
+async function getAllUsers(offset) {
   const client = new Client({ connectionString });
+  const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
   await client.connect();
-
-  let result;
+  const query = 'SELECT * FROM users LIMIT 10 OFFSET ($1)';
 
   try {
-    result = await client.query(q, values);
-  } catch (err) {
-    throw err;
-  } finally {
-    await client.end();
-  }
-
-  return result;
-}
-
-*/
-
-async function getAllUsers() {
-  const client = new Client({ connectionString });
-
-  await client.connect();
-  const query = 'SELECT * FROM users';
-
-  try {
-    const result = await client.query(query);
+    const result = await client.query(query, [Number(xss(off))]);
     const { rows } = result;
     return rows;
   } catch (err) {
