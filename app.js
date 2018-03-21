@@ -94,7 +94,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-async function validateUser(username, password) {
+async function validateUser(username, password) { // eslint-disable-line
   if (typeof username !== 'string' || username.length < 2) {
     return 'Notendanafn verður að vera amk 2 stafir';
   }
@@ -111,20 +111,6 @@ async function validateUser(username, password) {
 }
 
 async function register({ username, name, password } = {}) {
-  /* const { username, password, name } = req.body;
-
-  const validationMessage = await validateUser(username, password);
-
-  if (validationMessage) {
-    res.json({ message: validationMessage });
-  }
-
-  const result = await users.createUser(username, password, name);
-
-  // næsta middleware mun sjá um að skrá notanda inn því hann verður til
-  // og `username` og `password` verða ennþá sett sem rétt í `req`
-  next(); */
-   // eslint-disable-line
   const validationMessage = await validateUser(username, password);
   if (validationMessage) {
     return { status: 400, data: validationMessage };
@@ -138,32 +124,29 @@ async function register({ username, name, password } = {}) {
 
 // registers new user
 app.post('/register', async (req, res) => {
-  /*
-  register,
-  passport.authenticate('local', {
-    failureRedirect: '/login',
-  }),
-  (req, res) => {
-    res.redirect('/admin');
-  }, */
   const {
     username,
     name,
     password,
   } = req.body;
-
   const { status, data } = await register({
     username, name, password,
   });
-  return res.status(status).json(data);
+  const u = {
+    id: data.id,
+    user: data.username,
+    name: data.fname,
+    avatar: data.avatar,
+  } // eslint-disable-line
+  return res.status(status).json(u);
 });
 
 
-function notFoundHandler(req, res, next) {
+function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).json({ title: '404 villa' });
 }
 
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, next) { // eslint-disable-line
   console.error(err);
   res.status(500).json({ err });
 }
@@ -179,3 +162,4 @@ const {
 app.listen(port, () => {
   console.info(`Server running at http://${host}:${port}/`);
 });
+

@@ -1,37 +1,24 @@
 const bcrypt = require('bcrypt');
 const { Client } = require('pg');
+const xss = require('xss');
+
+const {
+  validateBook,
+  validateNum,
+  validatePaging,
+  validatePatch,
+} = require('./validation');
 
 const connectionString = process.env.DATABASE_URL;
 
-/*
-
-async function query(q, values = []) {
+async function getAllUsers(offset) {
   const client = new Client({ connectionString });
+  const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
   await client.connect();
-
-  let result;
+  const query = 'SELECT * FROM users LIMIT 10 OFFSET ($1)';
 
   try {
-    result = await client.query(q, values);
-  } catch (err) {
-    throw err;
-  } finally {
-    await client.end();
-  }
-
-  return result;
-}
-
-*/
-
-async function getAllUsers() {
-  const client = new Client({ connectionString });
-
-  await client.connect();
-  const query = 'SELECT * FROM users';
-
-  try {
-    const result = await client.query(query);
+    const result = await client.query(query, [Number(xss(off))]);
     const { rows } = result;
     return rows;
   } catch (err) {
@@ -68,7 +55,7 @@ async function findByUsername(username) {
 
 async function findById(id) {
   const client = new Client({ connectionString });
-  const query = 'SELECT id, username, name, photo FROM users WHERE id = $1';
+  const query = 'SELECT id, username, fname, avatar FROM users WHERE id = $1';
   await client.connect();
 
   try {
@@ -109,10 +96,48 @@ async function createUser(data) {
   }
 }
 
+/**
+ *`/users/:id/read`
+ *  - `GET` skilar _síðu_ af lesnum bókum notanda
+ /**
+  * get all the books a user has read
+  *
+  * @param {number} id - Username of user
+  * @param {number} offset - Offset of where to shot books
+  * @returns {Promise} Promise representing the object of the user to create
+  */
+async function getReadUser(id, offset) {
+  const client = new Client({ connectionString });
+  const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
+  const query = 'SELECT * FROM readBooks WHERE userID = ($1) LIMIT 10 OFFSET ($2)';
+  await client.connect();
+  const result = ({ error: '', item: [[]] });
+  const validation = validatePaging(id, offset);
+  if (validation.length < 1) {
+    try {
+      const dbResult = await client.query(query, [Number(xss(id)), Number(xss(off))]);
+      result.item = dbResult.rows;
+      result.error = null;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      await client.end();
+    }
+  } else {
+    result.item = null;
+    result.error = validation;
+  }
+
+  return result;
+}
+
+
 module.exports = {
   getAllUsers,
   comparePasswords,
   findByUsername,
   findById,
   createUser,
+  getReadUser,
 };
