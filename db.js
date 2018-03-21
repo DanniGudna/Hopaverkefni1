@@ -1,5 +1,6 @@
 const { Client } = require('pg');
 const bcrypt = require('bcrypt');
+const xss = require('xss');
 
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost/postgres';
 
@@ -70,7 +71,7 @@ async function createUser(username, password, name) {
 
   const q = 'INSERT INTO users (username, passwd, fname) VALUES ($1, $2, $3) RETURNING *';
 
-  const result = await query(q, [username, hashedPassword, name]);
+  const result = await query(q, [xss(username), hashedPassword, xss(name)]);
 
   return result.rows[0];
 }
@@ -78,7 +79,7 @@ async function createUser(username, password, name) {
 async function insertPic(username, img) {
   const q = 'UPDATE users SET avatar = ($1) WHERE (username) = ($2)';
 
-  const result = await query(q, [img, username]);
+  const result = await query(q, [img, xss(username)]);
   return result[0];
 }
 
