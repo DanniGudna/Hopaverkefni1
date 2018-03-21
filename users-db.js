@@ -107,12 +107,17 @@ async function createUser(data) {
   * @returns {Promise} Promise representing the object of the user to create
   */
 async function getReadUser(id, offset) {
+  console.log('OFFSET', offset)
+  console.log('ID', id)
   const client = new Client({ connectionString });
   const off = (typeof offset === 'undefined') ? 0 : parseInt(offset, 10);
+  console.log('OFFSET', off)
   const query = 'SELECT * FROM readBooks WHERE userID = ($1) LIMIT 10 OFFSET ($2)';
   await client.connect();
   const result = ({ error: '', item: [[]] });
-  const validation = validatePaging(id, offset);
+  //const validation = validatePaging(parseInt(id, 10), parseInt(off, 10));
+  const validation = [];
+  console.log('VALIDATION', validation)
   if (validation.length < 1) {
     try {
       const dbResult = await client.query(query, [Number(xss(id)), Number(xss(off))]);

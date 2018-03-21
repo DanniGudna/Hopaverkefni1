@@ -91,7 +91,9 @@ async function addBookReadBy(userid, bookid, grade, comments) {
   try {
     const result = await client.query(q, [Number(xss(userid)), Number(xss(bookid)), Number(xss(grade)), xss(comments)]);
     const { rows } = result;
-    return rows;
+    console.log('ROWS', rows[0])
+    return rows[0];
+
   } catch (err) {
     console.error(err);
     throw err;
