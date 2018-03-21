@@ -75,13 +75,14 @@ router.post('/me/profile', requireAuthentication, uploads.single('image'), async
   return res.json({ user: r });
 });
 
-router.post('/me/read', requireAuthentication, (req, res) => {
+router.post('/me/read', requireAuthentication, async (req, res) => {
   const {
     bookID,
     rating,
     review,
-  } = req.query;
-  const d = users.addBookReadBy(req.user.id, bookID, rating, review);
+  } = req.body;
+  const d = await users.addBookReadBy(req.user.id, bookID, rating, review);
+
   res.json(d);
 });
 
@@ -100,12 +101,15 @@ router.delete('/me/read/:id', (req, res) => {
   - `GET` skilar _síðu_ af lesnum bókum notanda -ekki rdy
   */
 async function userIdRead(req, res) {
-  const id = req.param;
+  const { id } = req.params;
+  console.log('id', id);
   const offset = req.query;
   const get = await getReadUser(id, offset);
   if (get.error === null) {
+    console.log("ping")
     return res.json(get.item);
   }
+  console.log("ping2")
   return res.status(404).json(get.error);
 }
 
@@ -113,6 +117,6 @@ function catchErrors(fn) {
   return (req, res, next) => fn(req, res, next).catch(next);
 }
 
-router.get('/users/:id/read', catchErrors(userIdRead));
+router.get('/:id/read', catchErrors(userIdRead));
 
 module.exports = router;
