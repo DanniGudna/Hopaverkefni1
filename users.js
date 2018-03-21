@@ -42,7 +42,12 @@ router.get('/me', requireAuthentication, (req, res) => {
 router.patch('/me', requireAuthentication, async (req, res) => { // eslint-disable-line
   const { password, name } = req.body;
   const u = await users.patchUser(password, name);
-  return res.json(u);
+  const user = {
+    username: u.username,
+    name: u.fname,
+    avatar: u.avatar,
+  };
+  return res.json(user);
 });
 
 router.post('/me/profile', requireAuthentication, uploads.single('image'), async (req, res, next) => {
