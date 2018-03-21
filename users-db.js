@@ -146,7 +146,7 @@ async function deleteMeReadId(userID, id) {
   const validation = [];
   if (validation.length < 1) {
     try {
-      const dbResult = await client.query(query, [Number(xss(userID)), Number(xss(id))]);
+      const dbResult = await client.query(query, [Number(xss(id)), Number(xss(userID))]);
       result.item = dbResult.rows;
       result.error = null;
     } catch (err) {

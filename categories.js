@@ -57,18 +57,13 @@ async function postCategory(category) {
   const client = new Client({ connectionString });
 
   const q = 'INSERT INTO categories (category) VALUES ($1)';
-  const check = 'SELECT category FROM categories WHERE category = ($1)';
+  // const check = 'SELECT category FROM categories WHERE category = ($1)';
   const result = ({ error: {}, item: [[]] });
   const validation = await validateCategory(category);
   if (validation.length === 0) {
     try {
       await client.connect();
-      const duplicateCheck = await client.query(check, [category]);
-      if (duplicateCheck.rows.length > 0) {
-        result.error = ({ field: 'category', message: 'category exist' });
-        await client.end();
-        return result;
-      }
+
       const dbResult = await client.query(q, [category]);
       await client.end();
       result.item = dbResult.rows;

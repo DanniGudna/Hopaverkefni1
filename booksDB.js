@@ -284,7 +284,8 @@ async function patchBookId(id, books) {
   });
 
   // validata það sem er ekki tómt
-  const validation = await validatePatch({ books });
+  const validation = await validatePatch(val);
+  console.log('VALIDATION', validation);
 
   if (validation.length === 0) {
     // patcha allt saman
@@ -294,9 +295,11 @@ async function patchBookId(id, books) {
     result.error = null;
   } else {
     // annars returna errors
-    result.errors = validation;
+    result.error = validation;
   }
+  console.log('RESULT', result)
   return result;
+
 }
 
 module.exports = {
