@@ -9,7 +9,8 @@ const {
   getBooks,
   postBook,
   getBookId,
-  patchBookId, // eslint-disable-line
+  patchBookId,
+  getOriginalValue,
 } = require('./booksDB');
 
 const router = express.Router();
@@ -125,8 +126,10 @@ async function booksPatch(req, res) {
       language,
     }
   );
+
   if (data.error === null) {
     return res.json(data.item);
+
   }
   return res.json(data.error);
 }
