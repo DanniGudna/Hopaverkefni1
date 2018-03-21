@@ -1,16 +1,16 @@
-const express = require('express'); // eslint-disable-line
+const express = require('express');
 
 const {
   getCategories,
   postCategory,
-} = require('./categories'); // eslint-disable-line
+} = require('./categories');
 
 const {
   getBooks,
   postBook,
   getBookId,
   patchBookId,
-} = require('./booksDB'); // eslint-disable-line
+} = require('./booksDB');
 
 const router = express.Router();
 
