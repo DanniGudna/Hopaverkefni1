@@ -108,7 +108,7 @@ async function patchUser(passwd, name) {
     hashedPassword = await bcrypt.hash(passwd, 11);
   }
   const result = await query(q, [xss(name), hashedPassword]);
-  return result[0];
+  return result.rows[0];
 }
 
 module.exports = {
