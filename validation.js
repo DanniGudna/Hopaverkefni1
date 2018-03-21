@@ -359,7 +359,7 @@ async function validateAddBookReadBy(bookid, grade, comments) {
   if (Number.isNaN(bookid)) {
     console.log('CONDITION PASSED')
     errors.push({ field: 'bookid', message: 'bookid must be a number' });
-  } else if (!validator.isInt(grade, { min: 1, max: 5 })) {
+  } else if (!validator.isInt(toString (grade), { min: 1, max: 5 })) {
     errors.push({ field: 'grade', message: 'Grade must be a number between 1 and 5' });
   } else if (typeof (comments) !== 'string') {
     errors.push({ field: 'comment', message: 'Comment must be text' });

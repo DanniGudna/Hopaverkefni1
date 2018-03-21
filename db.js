@@ -91,8 +91,8 @@ async function addBookReadBy(userid, bookid, grade, comments) {
   const client = new Client({ connectionString });
   const q = 'INSERT INTO readBooks (userID, bookID, rating, review) VALUES ($1, $2, $3, $4) RETURNING *';
   await client.connect();
-  const value = [Number(xss(userid)), Number(xss(bookid)), Number(xss(grade)), xss(comments)];
   const validation = validateAddBookReadBy(bookid, grade, comments);
+  const value = [Number(xss(userid)), Number(xss(bookid)), Number(xss(grade)), xss(comments)];
   if (validation.length > 0) {
     console.log('CONDITION PASSED')
     try {
