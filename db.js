@@ -83,6 +83,23 @@ async function insertPic(username, img) {
   return result[0];
 }
 
+async function addBookReadBy(userid, bookid, grade, comments) {
+  const client = new Client({ connectionString });
+  const q = 'INSERT INTO readBooks (userID, bookID, rating, review) VALUES ($1, $2, $3, $4) RETURNING *';
+  await client.connect();
+
+  try {
+    const result = await client.query(q, [Number(xss(userid)), Number(xss(bookid)), Number(xss(grade)), xss(comments)]);
+    const { rows } = result;
+    return rows;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  } finally {
+    await client.end();
+  }
+}
+
 module.exports = {
   runQuery,
   findById,
@@ -91,4 +108,5 @@ module.exports = {
   createUser,
   insertPic,
   query,
+  addBookReadBy,
 };

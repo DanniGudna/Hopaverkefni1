@@ -61,9 +61,9 @@ Gögn eru gefin innan `data/` möppu þar sem `books.csv` inniheldur 532 færslu
 Eftirfarandi slóðir eiga að vera til staðar, öll gögn sem send eru inn skulu vera á `JSON` formi og gögnum skilað á `JSON` formi.
 
 * /register
-  - POST býr til notanda og skilar án lykilorðs hash -rdy xss eftir
+  - POST býr til notanda og skilar án lykilorðs hash -rdy
 * /login
-  - POST með notendanafni og lykilorði skilar token -rdy xss eftir
+  - POST með notendanafni og lykilorði skilar token -rdy
 * /users
   - GET skilar síðu (sjá að neðan) af notendum - rdy
   - Lykilorðs hash skal ekki vera sýnilegt
