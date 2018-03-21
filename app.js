@@ -94,7 +94,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-async function validateUser(username, password) { // eslint-disable-line
+async function validateUser(username, password) {
   if (typeof username !== 'string' || username.length < 2) {
     return 'Notendanafn verður að vera amk 2 stafir';
   }

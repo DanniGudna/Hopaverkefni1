@@ -11,13 +11,9 @@ const connectionString = process.env.DATABASE_URL;
 
 /**
 * Get a page of books.
-* /books` GET` skilar _síðu_ af bokum
-* TODO: athugaau
-* @param {Object} books - Object
-* @param {number} books.limit - How many books should show up on the page
-* @param {number} books.offset - How many books should be skipped befor starting
-* the limit, should start at 0 then increment by X - ath veit ekki hvort að þurfi
-* @param {string} books.search - search query
+* @param {string} limit - How many books should show up on the page
+* @param {string} offset - How many books should be skipped befor starting
+* @param {string} search - search query
 * @returns {Promise} Promise representing an object containing either array of
 * the books for the page or the error message
 */
@@ -39,10 +35,11 @@ async function getBooks(offset, limit, search) {
     q = beginQ + endQ;
   }
   const result = ({
-    error: '', item: [[]], offset: off, limit: lim,
+    error: [[]], item: [[]], offset: off, limit: lim,
   });
 
   const validation = await validatePaging(off, lim);
+  console.info(validation);
 
   if (validation.length === 0) {
     try {
@@ -175,6 +172,7 @@ async function getBookId(id) {
  * Update a note asynchronously.
  *
  * @param {number} id - Id of note to update
+ * @param {Object} book - Object of a
  * @param {string} books.title - Title of the book
  * @param {string} books.isbn13 - isbn13 number of book- unique
  * @param {string} books.author - author of book
