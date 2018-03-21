@@ -14,9 +14,19 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
 router.get('/', async (req, res) => {
-  const data = await getAll();
 
-  res.status(200).json(data);
+  const { offset } = req.query;
+  const data = await getAll(offset);
+  const ubers = [];
+  for (let i = 0; i < data.length; i += 1) {
+    ubers.push({
+      id: data[i].id,
+      user: data[i].username,
+      name: data[i].fname,
+      avatar: data[i].avatar,
+    });
+  }
+  res.status(200).json(ubers);
 });
 
 

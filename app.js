@@ -129,11 +129,16 @@ app.post('/register', async (req, res) => {
     name,
     password,
   } = req.body;
-
   const { status, data } = await register({
     username, name, password,
   });
-  return res.status(status).json(data);
+  const u = {
+    id: data.id,
+    user: data.username,
+    name: data.fname,
+    avatar: data.avatar,
+  } // eslint-disable-line
+  return res.status(status).json(u);
 });
 
 
